@@ -6,9 +6,9 @@ export type PropsClassMainType = {name:string, ver?:number};
 
 export type PropsClassAddNoteBD = {path:string, type:'file'|'folder'};
 
-export type ReturnedErrorExplorerErrorType = {ok:boolean, error:string|null};
-export type ReturnedErrorExplorerFolderType = ReturnedErrorExplorerErrorType | ExplorerFolder;
-export type ReturnedErrorExplorerFileType = ReturnedErrorExplorerErrorType | ExplorerFile;
+export type ReturnedErrorExplorerType = {ok:false, error:string};
+export type ReturnedExplorerFolderType = ReturnedErrorExplorerType | ExplorerFolder;
+export type ReturnedExplorerFileType = ReturnedErrorExplorerType | ExplorerFile;
 
 export interface TableBuritiTypeBD {
   path:string;
@@ -16,7 +16,6 @@ export interface TableBuritiTypeBD {
   type:'file'|'folder';
   createdAt: number;
   updatedAt: number;
-  size: number;
 };
 
 

@@ -37,8 +37,7 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
         parent,
         type,
         createdAt: existingNode ? existingNode.createdAt : now,
-        updatedAt: now,
-        size: 0, // Por enquanto não vou mexer no size;
+        updatedAt: now
       });
     });
   }

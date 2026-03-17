@@ -1,7 +1,7 @@
 
 
 import StorageIndexedDB from "../storage/crud";
-import type { ReturnedErrorExplorerFileType, ReturnedErrorExplorerFolderType } from "../types/general";
+import type { ReturnedExplorerFileType, ReturnedExplorerFolderType } from "../types/general";
 import ExplorerFile from "./file";
 
 export default class ExplorerFolder {
@@ -9,8 +9,8 @@ export default class ExplorerFolder {
   private base:string;
   private storage:StorageIndexedDB;
 
-  ok:boolean = true;
-  error:string|null = null;
+  readonly ok: true = true;
+  readonly error: null = null;
 
   constructor(base:string, storage:StorageIndexedDB){
     this.base = (base == '/' ? base : (base.endsWith('/') ? base : `${base}/`)) ?? '/';
@@ -19,7 +19,7 @@ export default class ExplorerFolder {
 
   // ─── New ──────────────────────────────────────────────────
   
-  async newFolder(name:string):Promise<ReturnedErrorExplorerFolderType>{
+  async newFolder(name:string):Promise<ReturnedExplorerFolderType>{
     const path = `${this.base}${name}`;
     try {
       await this.storage.addNode({path, type:'folder'});
@@ -29,7 +29,7 @@ export default class ExplorerFolder {
     }
   }
 
-  async newFile(name:string):Promise<ReturnedErrorExplorerFileType>{
+  async newFile(name:string):Promise<ReturnedExplorerFileType>{
     const path = `${this.base}${name}`;
     try {
       await this.storage.addNode({path, type:'file'});

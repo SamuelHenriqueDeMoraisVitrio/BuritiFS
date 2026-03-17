@@ -60,7 +60,6 @@ export default class InitStorageIndexedDB {
        * parent:string => '/boot/efi';
        * createdAt:number<Date> => 88564;
        * updatedAt:number<Date> => 88564;
-       * size:number => 0;
       */
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result
