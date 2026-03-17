@@ -1,16 +1,16 @@
 
 
-import type { PropsClassMainType } from "./types/general";
+import type { PropsClassMainType } from "../types/general";
 
-export default class StorageIndexedDB {
+export default class InitStorageIndexedDB {
 
   protected db: IDBDatabase | null = null;
   private dbName: string;
-  private dbVersion: number = 1;
+  private dbVersion: number;
 
   constructor({name, ver}:PropsClassMainType){
     this.dbName = name;
-    this.dbVersion = ver ?? this.dbVersion;
+    this.dbVersion = ver ?? 1;
   }
 
   // ─── Helpers ───────────────────────────────────────────────
