@@ -1,0 +1,33 @@
+{
+  "name": "buritifs",
+  "version": "0.0.1",
+  "description": "A file system tree manager for the browser using OPFS and IndexedDB",
+  "exports": {
+    ".": "./dist/index.js",
+    "./react": "./dist/react/index.js"
+  },
+  "files":["dist"],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SamuelHenriqueDeMoraisVitrio/BuritiFS.git"
+  },
+  "keywords": ["opfs", "indexeddb", "filesystem", "browser", "offline"],
+  "author": "Samuel Henrique <vittecsolutions@gmail.com> https://github.com/SamuelHenriqueDeMoraisVitrio",
+  "license": "MIT",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/SamuelHenriqueDeMoraisVitrio/BuritiFS/issues"
+  },
+  "homepage": "https://github.com/SamuelHenriqueDeMoraisVitrio/BuritiFS#readme",
+  "peerDependencies": {
+    "react": ">=17"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": true }
+  }
+}
