@@ -4,6 +4,8 @@ import type { PropsClassMainType } from "../types/general";
 
 export default class InitStorageIndexedDB {
 
+  private static registry = new Map<string, IDBDatabase>();
+
   protected db: IDBDatabase | null = null;
   private dbName: string;
   private dbVersion: number;
@@ -43,6 +45,7 @@ export default class InitStorageIndexedDB {
 
       request.onsuccess = (event) => {
         this.db = (event.target as IDBOpenDBRequest).result;
+        InitStorageIndexedDB.registry.set(this.dbName, this.db);
         resolve();
       };
 
@@ -70,9 +73,12 @@ export default class InitStorageIndexedDB {
     });
   }
 
-  close(): void{
-    this.db?.close();
-    this.db = null;
+  static close(name: string): void {
+    const db = InitStorageIndexedDB.registry.get(name);
+    if (db) {
+      db.close();
+      InitStorageIndexedDB.registry.delete(name);
+    }
   }
 }
 
