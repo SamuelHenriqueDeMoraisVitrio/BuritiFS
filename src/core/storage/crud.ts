@@ -12,7 +12,7 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
     super(props);
   }
 
-  protected async addNode({path, type}:PropsClassAddNoteBD):Promise<void>{
+  async addNode({path, type}:PropsClassAddNoteBD):Promise<void>{
 
     const err_validatePath = validatePath({path});
     if(err_validatePath) throw new Error(err_validatePath);
