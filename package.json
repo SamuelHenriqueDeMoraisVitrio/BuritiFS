@@ -6,7 +6,9 @@
     ".": "./dist/index.js",
     "./react": "./dist/react/index.js"
   },
-  "files":["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "test": "vitest",
@@ -16,7 +18,13 @@
     "type": "git",
     "url": "git+https://github.com/SamuelHenriqueDeMoraisVitrio/BuritiFS.git"
   },
-  "keywords": ["opfs", "indexeddb", "filesystem", "browser", "offline"],
+  "keywords": [
+    "opfs",
+    "indexeddb",
+    "filesystem",
+    "browser",
+    "offline"
+  ],
   "author": "Samuel Henrique <vittecsolutions@gmail.com> https://github.com/SamuelHenriqueDeMoraisVitrio",
   "license": "MIT",
   "type": "module",
@@ -28,6 +36,14 @@
     "react": ">=17"
   },
   "peerDependenciesMeta": {
-    "react": { "optional": true }
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
   }
 }
