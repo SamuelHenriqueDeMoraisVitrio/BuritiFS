@@ -22,7 +22,7 @@ describe("NewExplorerTree", () => {
     });
   });
 
-  describe("newFile", () => {
+  describe("newFileSucess", () => {
     it("Must create a child file", async () => {
       const arquivo = await base.newFile('arquivo.txt');
       expect(arquivo.ok).toBe(true);
@@ -51,7 +51,7 @@ describe("NewExplorerTree", () => {
       });
     });
 
-    describe("newFile", () => {
+    describe("newFileErrors", () => {
       it("must return error when path contains spaces", async () => {
         const result = await base.newFile('invalid file.txt');
         expect(result.ok).toBe(false);
