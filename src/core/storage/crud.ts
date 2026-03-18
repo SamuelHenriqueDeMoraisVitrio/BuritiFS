@@ -2,7 +2,7 @@
 
 
 
-import { PropsClassAddNoteBD, PropsClassMainType } from "../types/general";
+import type { PropsClassAddNoteBD, PropsClassMainType, TableBuritiTypeBD } from "../types/general";
 import InitStorageIndexedDB from "./init";
 
 export default class StorageIndexedDB extends InitStorageIndexedDB {
@@ -13,8 +13,12 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
 
   async addNode({path, type}:PropsClassAddNoteBD):Promise<void>{
 
-    const propsTrated = await this.pathTrated({path, type});
+    if(type !== 'file' && type !== 'folder') throw new Error("Type must be 'file' or 'folder'");
+    if(path == '/') throw new Error("Should not create the root folder.");
+
+    const propsTrated = await this.pathTrated(path);
     if(propsTrated.path === '/') throw new Error("Cannot add root node");
+    if(propsTrated.table && propsTrated.table.type !== type) throw new Error(`Path "${path}" already exists as a "${propsTrated.table.type}"`);
 
     const now = Date.now();
 
@@ -27,6 +31,12 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
         updatedAt: now
       });
     });
+  }
+
+  async getSource(props:{path:string}):Promise<TableBuritiTypeBD|null>{
+    const propsTrated = await this.pathTrated(props.path);
+    if(!propsTrated.table) throw new Error(`Path ${props.path} does not exist`);
+    return propsTrated.table;
   }
 
 }

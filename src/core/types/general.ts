@@ -12,7 +12,7 @@ export type ReturnedExplorerFileType = ReturnedErrorExplorerType | ExplorerFile;
 
 interface TableBuritiTypeBDBase {
   path: string;
-  parent: string;
+  parent: string|null;
   createdAt: number;
   updatedAt: number;
 };

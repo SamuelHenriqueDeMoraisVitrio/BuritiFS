@@ -1,6 +1,6 @@
 
 
-import type { PropsClassAddNoteBD, PropsClassMainType, TableBuritiTypeBD } from "../types/general";
+import type { PropsClassMainType, TableBuritiTypeBD } from "../types/general";
 import validatePath from "../utils";
 
 export default class InitStorageIndexedDB {
@@ -38,9 +38,8 @@ export default class InitStorageIndexedDB {
     });
   }
 
-  protected async pathTrated({path, type}:PropsClassAddNoteBD):Promise<{path:string, parent:string|null, name:string, table:TableBuritiTypeBD|null}>{
+  protected async pathTrated(path:string):Promise<{path:string, parent:string|null, name:string, table:TableBuritiTypeBD|null}>{
     if(path === '/'){
-      if(type == 'file') throw new Error("Type must be 'folder'");
       return {
         path,
         parent:null,
@@ -49,7 +48,6 @@ export default class InitStorageIndexedDB {
       }
     };
 
-    if(type !== 'file' && type !== 'folder') throw new Error("Type must be 'file' or 'folder'");
 
     const err_validatePath = validatePath({path});
     if(err_validatePath) throw new Error(err_validatePath);
@@ -62,7 +60,6 @@ export default class InitStorageIndexedDB {
     if(parentNode.type !== 'folder') throw new Error(`Parent path "${parent}" is not a folder`);
 
     const existingNode = await this.request<TableBuritiTypeBD|null>('readonly', store => store.get(path));
-    if(existingNode && existingNode.type !== type) throw new Error(`Path "${path}" already exists as a "${existingNode.type}"`);
 
     return {path, parent, name:pathParts.pop() as string, table:existingNode};
   }

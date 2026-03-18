@@ -1,7 +1,8 @@
 
 
 import StorageIndexedDB from "../storage/crud";
-import type { PropsClassMainType, ReturnedExplorerFolderType } from "../types/general";
+import type { PropsClassMainType, ReturnedErrorExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType } from "../types/general";
+import ExplorerFile from "./file";
 import ExplorerFolder from "./folder";
 
 
@@ -11,20 +12,35 @@ export default class ExplorerTree extends StorageIndexedDB {
     super(props);
   }
 
-  static async create(props:PropsClassMainType):Promise<ReturnedExplorerFolderType>{
+  static async create(props:PropsClassMainType):Promise<ExplorerTree | ReturnedErrorExplorerType>{
     const instance = new ExplorerTree(props);
-    await instance.openDB();
     try {
+      await instance.openDB();
       await instance.transact("readwrite", (store) => {
         store.put({
           path:'/',
-          type:'folder'
+          type:'folder',
+          parent:null,
+          // Timestamps are 0 to mark the root as a sentinel node, not a user-created entry.
+          createdAt:0,
+          updatedAt:0
         });
       });
     } catch (e) {
       return {ok:false, error:e instanceof Error ? e.message : String(e)};
     }
-    return new ExplorerFolder('/', instance);
+    return instance;
+  }
+
+  async source(path:string):Promise<ReturnedExplorerFileType | ReturnedExplorerFolderType>{
+    try {
+      const table = await this.getSource({path});
+      if(table?.type === 'folder') return new ExplorerFolder(table.path, this);
+      if(table?.type === 'file') return new ExplorerFile(table.path, this);
+      return {ok:false, error:`Internal error: entity at "${path}" has no valid type`};
+    } catch (e) {
+      return {ok:false, error:e instanceof Error ? e.message : String(e)};
+    }
   }
 
   // Source

@@ -13,7 +13,7 @@ export default class ExplorerFolder {
   readonly error: null = null;
 
   constructor(base:string, storage:StorageIndexedDB){
-    this.base = (base == '/' ? base : (base.endsWith('/') ? base : `${base}/`)) ?? '/';
+    this.base = base == '/' ? base : (base.endsWith('/') ? base : `${base}/`);
     this.storage = storage;
   }
 
