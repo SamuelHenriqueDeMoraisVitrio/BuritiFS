@@ -87,18 +87,12 @@ export default class InitStorageIndexedDB {
         reject(new Error('IndexedDB blocked: close other tabs that are using the database.'));
       };
 
-      /*
-       * path:string => '/boot/efi/sla.txt';
-       * type:string<'file'|'folder'> => 'file';
-       * parent:string => '/boot/efi';
-       * createdAt:number<Date> => 88564;
-       * updatedAt:number<Date> => 88564;
-      */
       request.onupgradeneeded = (event) => {
-        const db = (event.target as IDBOpenDBRequest).result
-        const store = db.createObjectStore("nodes", { keyPath: "path" })
-        store.createIndex("type", "type")
-        store.createIndex("parent", "parent")
+        const db = (event.target as IDBOpenDBRequest).result;
+        const store = db.createObjectStore("nodes", { keyPath: "path" });
+        store.createIndex("type", "type");
+        store.createIndex("parent", "parent");
+        store.createIndex("extension", "extension");
       };
     });
   }

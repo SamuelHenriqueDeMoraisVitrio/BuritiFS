@@ -27,6 +27,12 @@ export default class ExplorerTree extends StorageIndexedDB {
     return new ExplorerFolder('/', instance);
   }
 
+  // Source
+  // mov or movGroup
+  // copy or copyGroup
+  // zip. Talvez futuramente.
+  // Sync Github. Talvez futuramente.
+
 }
 
 

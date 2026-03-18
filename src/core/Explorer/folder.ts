@@ -39,5 +39,12 @@ export default class ExplorerFolder {
     }
   }
 
+  // ─── Refactor ─────────────────────────────────────────────
+  
+  // List
+  // Get 'aa' | 'aa/bb';
+  // rename
+  // delete
+
 }
 

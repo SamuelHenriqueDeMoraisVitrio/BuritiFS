@@ -10,13 +10,23 @@ export type ReturnedErrorExplorerType = {ok:false, error:string};
 export type ReturnedExplorerFolderType = ReturnedErrorExplorerType | ExplorerFolder;
 export type ReturnedExplorerFileType = ReturnedErrorExplorerType | ExplorerFile;
 
-export interface TableBuritiTypeBD {
-  path:string;
-  parent:string;
-  type:'file'|'folder';
+interface TableBuritiTypeBDBase {
+  path: string;
+  parent: string;
   createdAt: number;
   updatedAt: number;
 };
+
+interface TableBuritiTypeBDFolder extends TableBuritiTypeBDBase {
+  type:'folder';
+};
+
+interface TableBuritiTypeBDFile extends TableBuritiTypeBDBase {
+  type: 'file';
+  extension?: string;
+};
+
+export type TableBuritiTypeBD = TableBuritiTypeBDFolder | TableBuritiTypeBDFile;
 
 
 
