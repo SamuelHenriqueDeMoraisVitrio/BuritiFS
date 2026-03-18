@@ -1,24 +1,26 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import ExplorerTree from "../src/core/Explorer/ExplorerMain";
 
-
-
-
 describe('ExplorerTree', () => {
+  let result: Awaited<ReturnType<typeof ExplorerTree.create>>;
 
-  it("Must building a class ExplorerTree", async () => {
-    const base = await ExplorerTree.create({ name: 'testeBanco' })
-    expect(base.ok).toBe(true)
-    expect(base.error).toBe(null)
+  beforeEach(async () => {
+    result = await ExplorerTree.create({ name: 'testeBanco' });
   });
 
-  it("must close the connection to the data", async () => {
-    const base = await ExplorerTree.create({ name: 'testeBanco' })
-    if(base.ok === false){
-      throw new Error(base.error);
-    }
+  afterEach(() => {
     ExplorerTree.close('testeBanco');
   });
 
-});
+  describe('ExplorerTreeSucess', () => {
+    it("Must building a class ExplorerTree", () => {
+      expect(result.ok).toBe(true);
+      expect(result.error).toBe(null);
+    });
 
+    it("must close the connection to the data", () => {
+      if (result.ok === false) throw new Error(result.error);
+      // connection is closed in afterEach without throwing
+    });
+  });
+});
