@@ -43,7 +43,6 @@ export default class ExplorerTree extends StorageIndexedDB {
     }
   }
 
-  // Source
   // mov or movGroup
   // copy or copyGroup
   // zip. Talvez futuramente.
