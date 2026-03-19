@@ -37,16 +37,27 @@ export default class ExplorerFolder {
 
   // ─── Refactor ─────────────────────────────────────────────
 
+  async rename({name}:{name:string}):Promise<ReturnedErrorOrSucessExplorerType>{
+    const path = this.base === '/' ? '/' : this.base.slice(0, -1);
+    const result = await this.storage.rename({path, name});
+    if (!result.ok) return result;
+    const parentPath = path.substring(0, path.lastIndexOf('/')) || '/';
+    this.base = `${parentPath === '/' ? '' : parentPath}/${name}/`;
+    return {ok:true, error:null};
+  }
+
   async copy({to, merge, priority}:{to:string, merge?:boolean, priority?:'source'|'destination'}):Promise<ReturnedExplorerFolderType>{
     const result = await this.storage.copy({fromPath: this.base, toPath: to, merge, priority});
     if (!result.ok) return result;
     return await this.storage.source({path: to}) as ReturnedExplorerFolderType;
   }
 
-  async move({to, merge, priority}:{to:string, merge?:boolean, priority?:'source'|'destination'}):Promise<ReturnedExplorerFolderType>{
+  async move({to, merge, priority}:{to:string, merge?:boolean, priority?:'source'|'destination'}):Promise<ReturnedErrorOrSucessExplorerType>{
     const result = await this.storage.move({fromPath: this.base, toPath: to, merge, priority});
     if (!result.ok) return result;
-    return await this.storage.source({path: to}) as ReturnedExplorerFolderType;
+    const newInstance = await this.storage.source({path: to});
+    if (newInstance instanceof ExplorerFolder) this.base = newInstance.base;
+    return {ok:true, error:null};
   }
 
   async delete():Promise<ReturnedErrorOrSucessExplorerType>{

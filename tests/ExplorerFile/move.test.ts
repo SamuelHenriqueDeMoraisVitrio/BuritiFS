@@ -17,18 +17,29 @@ describe('ExplorerFile.move', () => {
   });
 
   describe('success', () => {
-    it('must return an ExplorerFile instance of the destination', async () => {
+    it('must return ok and update self', async () => {
       const fileResult = await root.newFile({ name: 'arquivo.txt' });
       if (!(fileResult instanceof ExplorerFile)) throw new Error('setup failed');
 
       const result = await fileResult.move({ to: '/movido.txt' });
       expect(result.ok).toBe(true);
       expect(result.error).toBe(null);
-      expect(result).toBeInstanceOf(ExplorerFile);
 
       expect(await nodeExists('testeBanco', '/arquivo.txt')).toBe(false);
       expect(await nodeExistsAs('testeBanco', '/movido.txt', 'file')).toBe(true);
       expect(await checkIntegrity('testeBanco')).toEqual([]);
+    });
+
+    it('must update self so subsequent operations use the new path', async () => {
+      const fileResult = await root.newFile({ name: 'arquivo.txt' });
+      if (!(fileResult instanceof ExplorerFile)) throw new Error('setup failed');
+
+      await fileResult.move({ to: '/movido.txt' });
+      const deleteResult = await fileResult.delete();
+
+      expect(deleteResult.ok).toBe(true);
+      expect(await nodeExists('testeBanco', '/movido.txt')).toBe(false);
+      expect(await nodeExists('testeBanco', '/arquivo.txt')).toBe(false);
     });
 
     it('must overwrite destination when priority is source and destination exists', async () => {
@@ -37,7 +48,7 @@ describe('ExplorerFile.move', () => {
       await root.newFile({ name: 'movido.txt' });
 
       const result = await fileResult.move({ to: '/movido.txt', priority: 'source' });
-      expect(result).toBeInstanceOf(ExplorerFile);
+      expect(result.ok).toBe(true);
 
       expect(await nodeExists('testeBanco', '/arquivo.txt')).toBe(false);
       expect(await nodeExistsAs('testeBanco', '/movido.txt', 'file')).toBe(true);
@@ -52,7 +63,7 @@ describe('ExplorerFile.move', () => {
       const destinoBefore = await getNodeByPath('testeBanco', '/movido.txt');
 
       const result = await fileResult.move({ to: '/movido.txt', priority: 'destination' });
-      expect(result).toBeInstanceOf(ExplorerFile);
+      expect(result.ok).toBe(true);
 
       expect(await nodeExists('testeBanco', '/arquivo.txt')).toBe(false);
       const destinoAfter = await getNodeByPath('testeBanco', '/movido.txt');
@@ -64,7 +75,7 @@ describe('ExplorerFile.move', () => {
       if (!(fileResult instanceof ExplorerFile)) throw new Error('setup failed');
 
       const result = await fileResult.move({ to: '/movido.txt', priority: 'destination' });
-      expect(result).toBeInstanceOf(ExplorerFile);
+      expect(result.ok).toBe(true);
 
       expect(await nodeExists('testeBanco', '/arquivo.txt')).toBe(false);
       expect(await nodeExistsAs('testeBanco', '/movido.txt', 'file')).toBe(true);
@@ -97,7 +108,7 @@ describe('ExplorerFile.move', () => {
       if (!(fileResult instanceof ExplorerFile)) throw new Error('setup failed');
 
       const result = await fileResult.move({ to: '/movido.txt/' });
-      expect(result).toBeInstanceOf(ExplorerFile);
+      expect(result.ok).toBe(true);
       expect(await nodeExists('testeBanco', '/arquivo.txt')).toBe(false);
       expect(await nodeExistsAs('testeBanco', '/movido.txt', 'file')).toBe(true);
     });
@@ -107,7 +118,7 @@ describe('ExplorerFile.move', () => {
       if (!(fileResult instanceof ExplorerFile)) throw new Error('setup failed');
 
       const result = await fileResult.move({ to: 'movido.txt' });
-      expect(result).toBeInstanceOf(ExplorerFile);
+      expect(result.ok).toBe(true);
       expect(await nodeExists('testeBanco', '/arquivo.txt')).toBe(false);
       expect(await nodeExistsAs('testeBanco', '/movido.txt', 'file')).toBe(true);
     });

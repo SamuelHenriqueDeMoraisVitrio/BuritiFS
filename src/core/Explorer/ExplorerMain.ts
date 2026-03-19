@@ -106,9 +106,19 @@ export default class ExplorerTree extends StorageIndexedDB {
     }
   }
 
-  // mov
+  async rename({path, name}:{path:string, name:string}):Promise<ReturnedErrorOrSucessExplorerType>{
+    try {
+      const normalized = await this.pathTrated(path);
+      const parent = normalized.parent ?? '/';
+      const toPath = `${parent === '/' ? '' : parent}/${name}`;
+      await this.moveNode({fromPath: normalized.path, toPath});
+      return {ok:true, error:null};
+    } catch (e) {
+      return {ok:false, error:e instanceof Error ? e.message : String(e)};
+    }
+  }
+
   // List
-  // rename
   // zip. Talvez futuramente.
   // Sync Github. Talvez futuramente.
 

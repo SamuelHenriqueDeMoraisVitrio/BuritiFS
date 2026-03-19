@@ -16,7 +16,7 @@ describe('ExplorerFolder.move', () => {
   });
 
   describe('success', () => {
-    it('must return an ExplorerFolder instance of the destination', async () => {
+    it('must return ok and update self', async () => {
       await root.newFolder({ name: 'pasta' });
       const folderResult = await root.get({ name: 'pasta' });
       if (!(folderResult instanceof ExplorerFolder)) throw new Error('setup failed');
@@ -24,21 +24,31 @@ describe('ExplorerFolder.move', () => {
       const result = await folderResult.move({ to: '/movida' });
       expect(result.ok).toBe(true);
       expect(result.error).toBe(null);
-      expect(result).toBeInstanceOf(ExplorerFolder);
 
       expect(await nodeExists('testeBanco', '/pasta')).toBe(false);
       expect(await nodeExistsAs('testeBanco', '/movida', 'folder')).toBe(true);
       expect(await checkIntegrity('testeBanco')).toEqual([]);
     });
 
-    it('must move folder with children and return accessible instance', async () => {
+    it('must update self so subsequent operations use the new path', async () => {
+      const pasta = await root.newFolder({ name: 'pasta' });
+      if (!(pasta instanceof ExplorerFolder)) throw new Error('setup failed');
+
+      await pasta.move({ to: '/movida' });
+      await pasta.newFile({ name: 'novo.txt' });
+
+      expect(await nodeExistsAs('testeBanco', '/movida/novo.txt', 'file')).toBe(true);
+      expect(await nodeExists('testeBanco', '/pasta/novo.txt')).toBe(false);
+    });
+
+    it('must move folder with children', async () => {
       const pasta = await root.newFolder({ name: 'pasta' });
       if (!(pasta instanceof ExplorerFolder)) throw new Error('setup failed');
       await pasta.newFile({ name: 'arquivo.txt' });
       await pasta.newFolder({ name: 'sub' });
 
       const result = await pasta.move({ to: '/movida' });
-      expect(result).toBeInstanceOf(ExplorerFolder);
+      expect(result.ok).toBe(true);
 
       expect(await nodeExists('testeBanco', '/pasta')).toBe(false);
       expect(await nodeExistsAs('testeBanco', '/movida/arquivo.txt', 'file')).toBe(true);
@@ -56,7 +66,7 @@ describe('ExplorerFolder.move', () => {
       await movida.newFile({ name: 'destino.txt' });
 
       const result = await pasta.move({ to: '/movida', merge: false, priority: 'source' });
-      expect(result).toBeInstanceOf(ExplorerFolder);
+      expect(result.ok).toBe(true);
 
       expect(await nodeExists('testeBanco', '/pasta')).toBe(false);
       expect(await nodeExistsAs('testeBanco', '/movida/fonte.txt', 'file')).toBe(true);
@@ -73,7 +83,7 @@ describe('ExplorerFolder.move', () => {
       await movida.newFile({ name: 'destino.txt' });
 
       const result = await pasta.move({ to: '/movida', merge: false, priority: 'destination' });
-      expect(result).toBeInstanceOf(ExplorerFolder);
+      expect(result.ok).toBe(true);
 
       expect(await nodeExists('testeBanco', '/pasta')).toBe(false);
       expect(await nodeExists('testeBanco', '/movida/fonte.txt')).toBe(false);
@@ -92,7 +102,7 @@ describe('ExplorerFolder.move', () => {
       await movida.newFile({ name: 'so-destino.txt' });
 
       const result = await pasta.move({ to: '/movida', merge: true, priority: 'source' });
-      expect(result).toBeInstanceOf(ExplorerFolder);
+      expect(result.ok).toBe(true);
 
       expect(await nodeExists('testeBanco', '/pasta')).toBe(false);
       expect(await nodeExistsAs('testeBanco', '/movida/comum.txt', 'file')).toBe(true);
@@ -113,7 +123,7 @@ describe('ExplorerFolder.move', () => {
       const destinoBefore = await getNodeByPath('testeBanco', '/movida/comum.txt');
 
       const result = await pasta.move({ to: '/movida', merge: true, priority: 'destination' });
-      expect(result).toBeInstanceOf(ExplorerFolder);
+      expect(result.ok).toBe(true);
 
       expect(await nodeExists('testeBanco', '/pasta')).toBe(false);
       const destinoAfter = await getNodeByPath('testeBanco', '/movida/comum.txt');
@@ -149,7 +159,7 @@ describe('ExplorerFolder.move', () => {
       if (!(pasta instanceof ExplorerFolder)) throw new Error('setup failed');
 
       const result = await pasta.move({ to: '/movida/' });
-      expect(result).toBeInstanceOf(ExplorerFolder);
+      expect(result.ok).toBe(true);
       expect(await nodeExists('testeBanco', '/pasta')).toBe(false);
       expect(await nodeExistsAs('testeBanco', '/movida', 'folder')).toBe(true);
     });
@@ -159,7 +169,7 @@ describe('ExplorerFolder.move', () => {
       if (!(pasta instanceof ExplorerFolder)) throw new Error('setup failed');
 
       const result = await pasta.move({ to: 'movida' });
-      expect(result).toBeInstanceOf(ExplorerFolder);
+      expect(result.ok).toBe(true);
       expect(await nodeExists('testeBanco', '/pasta')).toBe(false);
       expect(await nodeExistsAs('testeBanco', '/movida', 'folder')).toBe(true);
     });
