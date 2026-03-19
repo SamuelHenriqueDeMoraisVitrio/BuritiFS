@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import ExplorerTree from "../src/core/Explorer/ExplorerMain";
 import ExplorerFolder from "../src/core/Explorer/folder";
 import ExplorerFile from "../src/core/Explorer/file";
+import { nodeExistsAs, checkIntegrity, isDbReady } from "./dataHelper";
 
 describe('ExplorerTree', () => {
   let result: Awaited<ReturnType<typeof ExplorerTree.create>>;
@@ -15,8 +16,13 @@ describe('ExplorerTree', () => {
   });
 
   describe('ExplorerTreeSucess', () => {
-    it("Must building a class ExplorerTree", () => {
+    it("Must building a class ExplorerTree", async () => {
       expect(result).toBeInstanceOf(ExplorerTree);
+
+      // DB-level: schema must be ready and root node must exist
+      expect(await isDbReady('testeBanco')).toBe(true);
+      expect(await nodeExistsAs('testeBanco', '/', 'folder')).toBe(true);
+      expect(await checkIntegrity('testeBanco')).toEqual([]);
     });
 
     it("must close the connection to the data", () => {
@@ -40,6 +46,9 @@ describe('ExplorerTree', () => {
         if (!(result instanceof ExplorerTree)) return;
         const folder = await result.source({path: '/'});
         expect(folder).toBeInstanceOf(ExplorerFolder);
+
+        // DB-level: root folder must exist
+        expect(await nodeExistsAs('testeBanco', '/', 'folder')).toBe(true);
       });
 
       it("must return ExplorerFile when path is a file", async () => {
@@ -49,6 +58,10 @@ describe('ExplorerTree', () => {
         await root.newFile({name: 'test.txt'});
         const file = await result.source({path: '/test.txt'});
         expect(file).toBeInstanceOf(ExplorerFile);
+
+        // DB-level: file must be persisted and DB must be consistent
+        expect(await nodeExistsAs('testeBanco', '/test.txt', 'file')).toBe(true);
+        expect(await checkIntegrity('testeBanco')).toEqual([]);
       });
     });
 

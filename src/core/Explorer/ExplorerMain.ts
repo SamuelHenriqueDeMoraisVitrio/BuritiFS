@@ -16,14 +16,15 @@ export default class ExplorerTree extends StorageIndexedDB {
     const instance = new ExplorerTree(props);
     try {
       await instance.openDB();
+      const now = Date.now();
+      const existing = await instance.request<{ createdAt: number } | null>('readonly', store => store.get('/'));
       await instance.transact("readwrite", (store) => {
         store.put({
           path:'/',
           type:'folder',
           parent:null,
-          // Timestamps are 0 to mark the root as a sentinel node, not a user-created entry.
-          createdAt:0,
-          updatedAt:0
+          createdAt: existing?.createdAt ?? now,
+          updatedAt: now
         });
       });
     } catch (e) {
