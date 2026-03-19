@@ -91,8 +91,8 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
     // ─── File ─────────────────────────────────────────────────
 
     if (fromEntity.type === 'file') {
-      if (priority === 'destination' && toEntityProps.table !== null) return;
-      if (toEntityProps.table !== null) await this.removeNode({path: toEntityProps.path});
+      if (priority === 'destination' && !!toEntityProps.table) return;
+      if (!!toEntityProps.table) await this.removeNode({path: toEntityProps.path});
       await this.transact('readwrite', (store) => {
         store.put({...fromEntity, path: toEntityProps.path, parent: toEntityProps.parent, updatedAt: now});
       });
@@ -104,10 +104,11 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
     if (fromEntity.type === 'folder') {
 
       if (priority === 'destination') {
-        if (!merge || toEntityProps.table?.type === 'file') return;
+        if (!merge && !!toEntityProps.table) return;
+        if (toEntityProps.table?.type === 'file') return;
       }
 
-      if (!merge && toEntityProps.table !== null) await this.removeNode({path: toEntityProps.path});
+      if (!merge && !!toEntityProps.table) await this.removeNode({path: toEntityProps.path});
       else if (toEntityProps.table?.type === 'file') await this.removeNode({path: toEntityProps.path});
 
       await this.addNode({path: toEntityProps.path, type: 'folder'});

@@ -2,6 +2,13 @@ import ExplorerTree from '../../src/core/Explorer/ExplorerMain';
 import ExplorerFolder from '../../src/core/Explorer/folder';
 
 export async function createTreeAndRoot() {
+  await new Promise<void>((resolve) => {
+    const req = indexedDB.deleteDatabase('testeBanco');
+    req.onsuccess = () => resolve();
+    req.onerror = () => resolve();
+    req.onblocked = () => resolve();
+  });
+
   const result = await ExplorerTree.create({ name: 'testeBanco' });
   if (!(result instanceof ExplorerTree)) throw new Error(result.error);
 
