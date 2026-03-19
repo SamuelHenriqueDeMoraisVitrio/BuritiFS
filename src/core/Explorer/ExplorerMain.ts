@@ -88,8 +88,17 @@ export default class ExplorerTree extends StorageIndexedDB {
     }
   }
 
+  async copy({fromPath, toPath, merge, priority}:{fromPath:string, toPath:string, merge?:boolean, priority?:'source'|'destination'}):Promise<ReturnedErrorOrSucessExplorerType>{
+    try {
+      await this.copyNode({fromPath, toPath, merge, priority});
+      return {ok:true, error:null};
+    } catch (e) {
+      return {ok:false, error:e instanceof Error ? e.message : String(e)};
+    }
+  }
+
   // mov or movGroup
-  // copy or copyGroup
+  // copyGroup
   // zip. Talvez futuramente.
   // Sync Github. Talvez futuramente.
 
