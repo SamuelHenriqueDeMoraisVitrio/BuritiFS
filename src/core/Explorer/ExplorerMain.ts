@@ -97,8 +97,9 @@ export default class ExplorerTree extends StorageIndexedDB {
     }
   }
 
-  // mov or movGroup
-  // copyGroup
+  // mov
+  // List
+  // rename
   // zip. Talvez futuramente.
   // Sync Github. Talvez futuramente.
 

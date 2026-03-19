@@ -47,8 +47,5 @@ export default class ExplorerFolder {
     return await this.storage.delete({path: this.base});
   }
 
-  // List
-  // rename
-
 }
 
