@@ -1,7 +1,7 @@
 
 
 import StorageIndexedDB from "../storage/crud";
-import type { PropsClassMainType, ReturnedErrorExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType } from "../types/general";
+import type { PropsClassMainType, ReturnedErrorExplorerType, ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType } from "../types/general";
 import ExplorerFile from "./file";
 import ExplorerFolder from "./folder";
 
@@ -78,6 +78,15 @@ export default class ExplorerTree extends StorageIndexedDB {
   }
 
   // ─── Refactor ─────────────────────────────────────────────
+  
+  async delete({path}:{path:string}):Promise<ReturnedErrorOrSucessExplorerType>{
+    try {
+      await this.removeNode({path});
+      return {ok:true, error:null};
+    } catch (e) {
+      return {ok:false, error:e instanceof Error ? e.message : String(e)};
+    }
+  }
 
   // mov or movGroup
   // copy or copyGroup

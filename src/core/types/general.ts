@@ -6,6 +6,7 @@ export type PropsClassMainType = {name:string, ver?:number};
 
 export type PropsClassAddNoteBD = {path:string, type:'file'|'folder'};
 
+export type ReturnedErrorOrSucessExplorerType = {ok:false, error:string} | {ok:true, error:null};
 export type ReturnedErrorExplorerType = {ok:false, error:string};
 export type ReturnedExplorerFolderType = ReturnedErrorExplorerType | ExplorerFolder;
 export type ReturnedExplorerFileType = ReturnedErrorExplorerType | ExplorerFile;
