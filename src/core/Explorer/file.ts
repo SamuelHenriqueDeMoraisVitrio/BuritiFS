@@ -1,7 +1,7 @@
 
 
 
-import type { ReturnedErrorOrSucessExplorerType } from "../types/general";
+import type { ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType } from "../types/general";
 import type ExplorerTree from "./ExplorerMain";
 
 export default class ExplorerFile {
@@ -17,6 +17,12 @@ export default class ExplorerFile {
   }
 
   // ─── Refactor ─────────────────────────────────────────────
+
+  async copy({to, merge, priority}:{to:string, merge?:boolean, priority?:'source'|'destination'}):Promise<ReturnedExplorerFileType>{
+    const result = await this.storage.copy({fromPath: this.base, toPath: to, merge, priority});
+    if (!result.ok) return result;
+    return await this.storage.source({path: to}) as ReturnedExplorerFileType;
+  }
 
   async delete():Promise<ReturnedErrorOrSucessExplorerType>{
     return await this.storage.delete({path: this.base});
