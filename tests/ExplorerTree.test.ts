@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import ExplorerTree from "../src/core/Explorer/ExplorerMain";
 import ExplorerFolder from "../src/core/Explorer/folder";
 import ExplorerFile from "../src/core/Explorer/file";
-import { nodeExistsAs, checkIntegrity, isDbReady } from "./dataHelper";
+import { nodeExistsAs, checkIntegrity, isDbReady } from "./helpers/dataHelper";
 
 describe('ExplorerTree', () => {
   let result: Awaited<ReturnType<typeof ExplorerTree.create>>;

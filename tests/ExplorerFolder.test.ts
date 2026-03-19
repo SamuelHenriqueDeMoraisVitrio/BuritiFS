@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import ExplorerTree from '../../src/core/Explorer/ExplorerMain';
-import ExplorerFolder from '../../src/core/Explorer/folder';
-import { createTreeAndRoot } from './helpers';
-import { nodeExistsAs, nodeExists, hasValidTimestamps, checkIntegrity } from '../dataHelper';
+import ExplorerTree from '../src/core/Explorer/ExplorerMain';
+import ExplorerFolder from '../src/core/Explorer/folder';
+import { createTreeAndRoot } from './helpers/fixtures';
+import { nodeExistsAs, nodeExists, hasValidTimestamps, checkIntegrity } from './helpers/dataHelper';
 
 describe('ExplorerFolder', () => {
   let tree: ExplorerTree;
