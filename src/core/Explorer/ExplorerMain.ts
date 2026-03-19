@@ -32,7 +32,9 @@ export default class ExplorerTree extends StorageIndexedDB {
     return instance;
   }
 
-  async source(path:string):Promise<ReturnedExplorerFileType | ReturnedExplorerFolderType>{
+  // ─── Get ──────────────────────────────────────────────────
+
+  async source({path}:{path:string}):Promise<ReturnedExplorerFileType | ReturnedExplorerFolderType>{
     try {
       const table = await this.getSource({path});
       if(table.type === 'folder') return new ExplorerFolder(table.path, this);
@@ -42,6 +44,39 @@ export default class ExplorerTree extends StorageIndexedDB {
       return {ok:false, error:e instanceof Error ? e.message : String(e)};
     }
   }
+
+  // ─── Info ─────────────────────────────────────────────────
+
+  async type({path}:{path:string}):Promise<string|null>{
+    try {
+      const entity = await this.getSource({path});
+      return entity.path === '/' ? 'folder' : entity.type;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // ─── New ──────────────────────────────────────────────────
+  
+  async newFolder({path}:{path:string}):Promise<ReturnedExplorerFolderType>{
+    try {
+      await this.addNode({path, type:'folder'});
+      return new ExplorerFolder(path, this);
+    } catch (e) {
+      return {ok:false, error:e instanceof Error ? e.message : String(e)};
+    }
+  }
+
+  async newFile({path}:{path:string}):Promise<ReturnedExplorerFileType>{
+    try {
+      await this.addNode({path, type:'file'});
+      return new ExplorerFile(path, this);
+    } catch (e) {
+      return {ok:false, error:e instanceof Error ? e.message : String(e)};
+    }
+  }
+
+  // ─── Refactor ─────────────────────────────────────────────
 
   // mov or movGroup
   // copy or copyGroup

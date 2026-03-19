@@ -1,16 +1,16 @@
 
 
 
-import StorageIndexedDB from "../storage/crud";
+import type ExplorerTree from "./ExplorerMain";
 
 export default class ExplorerFile {
   private base:string;
-  private storage:StorageIndexedDB;
+  private storage:ExplorerTree;
 
-  ok:true = true;
-  error:null = null;
+  readonly ok:true = true;
+  readonly error:null = null;
 
-  constructor(base:string, storage:StorageIndexedDB){
+  constructor(base:string, storage:ExplorerTree){
     this.base = base;
     this.storage = storage;
   }

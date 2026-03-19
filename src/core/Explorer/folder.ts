@@ -1,42 +1,31 @@
 
 
-import StorageIndexedDB from "../storage/crud";
 import type { ReturnedExplorerFileType, ReturnedExplorerFolderType } from "../types/general";
-import ExplorerFile from "./file";
+import type ExplorerTree from "./ExplorerMain";
 
 export default class ExplorerFolder {
 
   private base:string;
-  private storage:StorageIndexedDB;
+  private storage:ExplorerTree;
 
   readonly ok: true = true;
   readonly error: null = null;
 
-  constructor(base:string, storage:StorageIndexedDB){
+  constructor(base:string, storage:ExplorerTree){
     this.base = base == '/' ? base : (base.endsWith('/') ? base : `${base}/`);
     this.storage = storage;
   }
 
   // ─── New ──────────────────────────────────────────────────
   
-  async newFolder(name:string):Promise<ReturnedExplorerFolderType>{
+  async newFolder({name}:{name:string}):Promise<ReturnedExplorerFolderType>{
     const path = `${this.base}${name}`;
-    try {
-      await this.storage.addNode({path, type:'folder'});
-      return new ExplorerFolder(path, this.storage);
-    } catch (e) {
-      return {ok:false, error:e instanceof Error ? e.message : String(e)};
-    }
+    return await this.storage.newFolder({path});
   }
 
-  async newFile(name:string):Promise<ReturnedExplorerFileType>{
+  async newFile({name}:{name:string}):Promise<ReturnedExplorerFileType>{
     const path = `${this.base}${name}`;
-    try {
-      await this.storage.addNode({path, type:'file'});
-      return new ExplorerFile(path, this.storage);
-    } catch (e) {
-      return {ok:false, error:e instanceof Error ? e.message : String(e)};
-    }
+    return await this.storage.newFile({path});
   }
 
   // ─── Refactor ─────────────────────────────────────────────

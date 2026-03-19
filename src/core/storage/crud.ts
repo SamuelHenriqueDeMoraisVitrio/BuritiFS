@@ -11,13 +11,13 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
     super(props);
   }
 
-  async getSource(props:{path:string}):Promise<TableBuritiTypeBD>{
+  protected async getSource(props:{path:string}):Promise<TableBuritiTypeBD>{
     const propsTrated = await this.pathTrated(props.path);
     if(!propsTrated.table) throw new Error(`Path ${props.path} does not exist`);
     return propsTrated.table;
   }
 
-  async addNode({path, type}:PropsClassAddNoteBD):Promise<void>{
+  protected async addNode({path, type}:PropsClassAddNoteBD):Promise<void>{
 
     if(type !== 'file' && type !== 'folder') throw new Error("Type must be 'file' or 'folder'");
     if(path == '/') throw new Error("Should not create the root folder.");
@@ -39,7 +39,7 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
     });
   }
 
-  async removeNode({path}:{path:string}):Promise<void>{
+  protected async removeNode({path}:{path:string}):Promise<void>{
 
     if(path === '/') throw new Error('Cannot remove root node.');
 

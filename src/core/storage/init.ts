@@ -94,7 +94,7 @@ export default class InitStorageIndexedDB {
     });
   }
 
-  static close(name: string): void {
+  static close({name}:{name: string}): void {
     const db = InitStorageIndexedDB.registry.get(name);
     if (db) {
       db.close();
