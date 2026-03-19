@@ -58,7 +58,7 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
       return;
     }
 
-    throw new Error("Mensagem de erro!");
+    throw new Error(`Unknown node type "${(node as TableBuritiTypeBD).type}" at path "${path}".`);
 
   }
 
