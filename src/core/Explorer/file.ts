@@ -1,7 +1,7 @@
 
 
 
-import type { ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType } from "../types/general";
+import type { ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerInfoType } from "../types/general";
 import type ExplorerTree from "./ExplorerMain";
 
 export default class ExplorerFile {
@@ -10,10 +10,19 @@ export default class ExplorerFile {
 
   readonly ok:true = true;
   readonly error:null = null;
+  readonly type: 'file' = 'file';
+
+  get path(): string { return this.base; }
 
   constructor(base:string, storage:ExplorerTree){
     this.base = base;
     this.storage = storage;
+  }
+
+  // ─── Info ─────────────────────────────────────────────────
+
+  async info():Promise<ReturnedExplorerInfoType>{
+    return await this.storage.info({path: this.base});
   }
 
   // ─── Refactor ─────────────────────────────────────────────

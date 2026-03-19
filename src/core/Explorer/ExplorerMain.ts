@@ -1,7 +1,7 @@
 
 
 import StorageIndexedDB from "../storage/crud";
-import type { PropsClassMainType, ReturnedErrorExplorerType, ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType } from "../types/general";
+import type { PropsClassMainType, ReturnedErrorExplorerType, ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType, ReturnedExplorerInfoType } from "../types/general";
 import ExplorerFile from "./file";
 import ExplorerFolder from "./folder";
 
@@ -47,6 +47,16 @@ export default class ExplorerTree extends StorageIndexedDB {
   }
 
   // ─── Info ─────────────────────────────────────────────────
+
+  async info({path}:{path:string}):Promise<ReturnedExplorerInfoType>{
+    try {
+      const table = await this.getSource({path});
+      const extension = table.type === 'file' ? table.extension : undefined;
+      return {ok:true, error:null, path:table.path, createdAt:table.createdAt, updatedAt:table.updatedAt, extension};
+    } catch (e) {
+      return {ok:false, error:e instanceof Error ? e.message : String(e)};
+    }
+  }
 
   async type({path}:{path:string}):Promise<string|null>{
     try {
