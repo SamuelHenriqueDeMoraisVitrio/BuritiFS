@@ -1,6 +1,6 @@
 
 
-import type { ReturnedExplorerFileType, ReturnedExplorerFolderType } from "../types/general";
+import type { ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType } from "../types/general";
 import type ExplorerTree from "./ExplorerMain";
 
 export default class ExplorerFolder {
@@ -29,11 +29,14 @@ export default class ExplorerFolder {
   }
 
   // ─── Refactor ─────────────────────────────────────────────
-  
+
+  async delete():Promise<ReturnedErrorOrSucessExplorerType>{
+    return await this.storage.delete({path: this.base});
+  }
+
   // List
   // Get 'aa' | 'aa/bb';
   // rename
-  // delete
 
 }
 

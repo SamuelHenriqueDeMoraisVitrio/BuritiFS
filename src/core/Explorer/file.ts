@@ -1,6 +1,7 @@
 
 
 
+import type { ReturnedErrorOrSucessExplorerType } from "../types/general";
 import type ExplorerTree from "./ExplorerMain";
 
 export default class ExplorerFile {
@@ -13,6 +14,10 @@ export default class ExplorerFile {
   constructor(base:string, storage:ExplorerTree){
     this.base = base;
     this.storage = storage;
+  }
+
+  async delete():Promise<ReturnedErrorOrSucessExplorerType>{
+    return await this.storage.delete({path: this.base});
   }
 }
 
