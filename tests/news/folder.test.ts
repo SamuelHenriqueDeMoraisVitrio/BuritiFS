@@ -12,12 +12,12 @@ describe('ExplorerFolder', () => {
   });
 
   afterEach(() => {
-    ExplorerTree.close('testeBanco');
+    ExplorerTree.close({name: 'testeBanco'});
   });
 
   describe('newFolderSuccess', () => {
     it('must create a child folder', async () => {
-      const result = await root.newFolder('pastaFilho');
+      const result = await root.newFolder({name: 'pastaFilho'});
       expect(result.ok).toBe(true);
       expect(result.error).toBe(null);
       expect(result).toBeInstanceOf(ExplorerFolder);
@@ -26,19 +26,19 @@ describe('ExplorerFolder', () => {
 
   describe('newFolderErrors', () => {
     it('must return error when path contains spaces', async () => {
-      const result = await root.newFolder('invalid folder');
+      const result = await root.newFolder({name: 'invalid folder'});
       expect(result.ok).toBe(false);
       expect(result.error).toBe('Path cannot contain spaces');
     });
 
     it('must return error when path contains double slashes', async () => {
-      const result = await root.newFolder('//invalid///folder///');
+      const result = await root.newFolder({name: '//invalid///folder///'});
       expect(result.ok).toBe(false);
       expect(result.error).toBe('Path cannot contain "//"');
     });
 
     it('must return error when parent does not exist', async () => {
-      const result = await root.newFolder('nonexistent/child');
+      const result = await root.newFolder({name: 'nonexistent/child'});
       expect(result.ok).toBe(false);
       expect(result.error).toContain('does not exist');
     });

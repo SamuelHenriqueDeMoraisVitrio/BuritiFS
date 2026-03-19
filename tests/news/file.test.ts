@@ -13,12 +13,12 @@ describe('ExplorerFile', () => {
   });
 
   afterEach(() => {
-    ExplorerTree.close('testeBanco');
+    ExplorerTree.close({name: 'testeBanco'});
   });
 
   describe('newFileSuccess', () => {
     it('must create a child file', async () => {
-      const result = await root.newFile('arquivo.txt');
+      const result = await root.newFile({name: 'arquivo.txt'});
       expect(result.ok).toBe(true);
       expect(result.error).toBe(null);
       expect(result).toBeInstanceOf(ExplorerFile);
@@ -27,20 +27,20 @@ describe('ExplorerFile', () => {
 
   describe('newFileErrors', () => {
     it('must return error when path contains spaces', async () => {
-      const result = await root.newFile('invalid file.txt');
+      const result = await root.newFile({name: 'invalid file.txt'});
       expect(result.ok).toBe(false);
       expect(result.error).toBe('Path cannot contain spaces');
     });
 
     it('must return error when parent folder does not exist', async () => {
-      const result = await root.newFile('nonexistent/file.txt');
+      const result = await root.newFile({name: 'nonexistent/file.txt'});
       expect(result.ok).toBe(false);
       expect(result.error).toContain('does not exist');
     });
 
     it('must return error when path already exists as a folder', async () => {
-      await root.newFolder('docs');
-      const result = await root.newFile('docs');
+      await root.newFolder({name: 'docs'});
+      const result = await root.newFile({name: 'docs'});
       expect(result.ok).toBe(false);
       expect(result.error).toContain('already exists as a "folder"');
     });

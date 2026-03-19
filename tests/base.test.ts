@@ -11,7 +11,7 @@ describe('ExplorerTree', () => {
   });
 
   afterEach(() => {
-    ExplorerTree.close('testeBanco');
+    ExplorerTree.close({name: 'testeBanco'});
   });
 
   describe('ExplorerTreeSucess', () => {
@@ -38,16 +38,16 @@ describe('ExplorerTree', () => {
     describe('ExplorerTreeSourceSuccess', () => {
       it("must return ExplorerFolder when path is a folder", async () => {
         if (!(result instanceof ExplorerTree)) return;
-        const folder = await result.source('/');
+        const folder = await result.source({path: '/'});
         expect(folder).toBeInstanceOf(ExplorerFolder);
       });
 
       it("must return ExplorerFile when path is a file", async () => {
         if (!(result instanceof ExplorerTree)) return;
-        const root = await result.source('/');
+        const root = await result.source({path: '/'});
         if (!(root instanceof ExplorerFolder)) return;
-        await root.newFile('test.txt');
-        const file = await result.source('/test.txt');
+        await root.newFile({name: 'test.txt'});
+        const file = await result.source({path: '/test.txt'});
         expect(file).toBeInstanceOf(ExplorerFile);
       });
     });
@@ -55,7 +55,7 @@ describe('ExplorerTree', () => {
     describe('ExplorerTreeSourceError', () => {
       it("must return error object when path does not exist", async () => {
         if (!(result instanceof ExplorerTree)) return;
-        const bad = await result.source('/nonexistent');
+        const bad = await result.source({path: '/nonexistent'});
         if (bad instanceof ExplorerFolder || bad instanceof ExplorerFile) return;
         expect(bad.ok).toBe(false);
         expect(typeof bad.error).toBe('string');
