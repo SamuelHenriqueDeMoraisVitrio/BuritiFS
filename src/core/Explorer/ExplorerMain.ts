@@ -35,8 +35,8 @@ export default class ExplorerTree extends StorageIndexedDB {
   async source(path:string):Promise<ReturnedExplorerFileType | ReturnedExplorerFolderType>{
     try {
       const table = await this.getSource({path});
-      if(table?.type === 'folder') return new ExplorerFolder(table.path, this);
-      if(table?.type === 'file') return new ExplorerFile(table.path, this);
+      if(table.type === 'folder') return new ExplorerFolder(table.path, this);
+      if(table.type === 'file') return new ExplorerFile(table.path, this);
       return {ok:false, error:`Internal error: entity at "${path}" has no valid type`};
     } catch (e) {
       return {ok:false, error:e instanceof Error ? e.message : String(e)};

@@ -11,6 +11,12 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
     super(props);
   }
 
+  async getSource(props:{path:string}):Promise<TableBuritiTypeBD>{
+    const propsTrated = await this.pathTrated(props.path);
+    if(!propsTrated.table) throw new Error(`Path ${props.path} does not exist`);
+    return propsTrated.table;
+  }
+
   async addNode({path, type}:PropsClassAddNoteBD):Promise<void>{
 
     if(type !== 'file' && type !== 'folder') throw new Error("Type must be 'file' or 'folder'");
@@ -33,10 +39,23 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
     });
   }
 
-  async getSource(props:{path:string}):Promise<TableBuritiTypeBD|null>{
-    const propsTrated = await this.pathTrated(props.path);
-    if(!propsTrated.table) throw new Error(`Path ${props.path} does not exist`);
-    return propsTrated.table;
+  async removeNode({path}:{path:string}):Promise<void>{
+
+    if(path === '/') throw new Error('Mensagem de erro!');
+
+    const node = await this.getSource({path});
+
+    if (node.type === 'file') await this.transact("readwrite", store => store.delete(node.path));
+
+    if (node.type === 'folder'){
+      await this.transact("readwrite", store => {
+        store.delete(IDBKeyRange.bound(node.path+'/', (node.path+'/') + "\uffff"));
+        store.delete(node.path);
+      });
+    }
+
+    throw new Error("Mensagem de erro!");
+
   }
 
 }
