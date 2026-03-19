@@ -45,4 +45,24 @@ describe('ExplorerTree.source', () => {
       expect(typeof result.error).toBe('string');
     });
   });
+
+  describe('sanitization', () => {
+    it('must accept folder path with trailing slash', async () => {
+      const root = await tree.source({ path: '/' });
+      if (!(root instanceof ExplorerFolder)) return;
+      await root.newFolder({ name: 'pasta' });
+
+      const result = await tree.source({ path: '/pasta/' });
+      expect(result).toBeInstanceOf(ExplorerFolder);
+    });
+
+    it('must accept file path without leading slash', async () => {
+      const root = await tree.source({ path: '/' });
+      if (!(root instanceof ExplorerFolder)) return;
+      await root.newFile({ name: 'arquivo.txt' });
+
+      const result = await tree.source({ path: 'arquivo.txt' });
+      expect(result).toBeInstanceOf(ExplorerFile);
+    });
+  });
 });

@@ -49,8 +49,10 @@ export default class InitStorageIndexedDB {
     };
 
 
-    const err_validatePath = validatePath({path});
+    const pathObj = {path};
+    const err_validatePath = validatePath(pathObj);
     if(err_validatePath) throw new Error(err_validatePath);
+    path = pathObj.path;
 
     const pathParts = path.split('/');
     const parent = pathParts.length === 2 ? '/' : pathParts.slice(0, -1).join('/');
