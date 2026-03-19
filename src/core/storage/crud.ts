@@ -191,21 +191,12 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
         ? store.openCursor(IDBKeyRange.bound(norm.path + '/', norm.path + '/' + '\uffff'))
         : store.index('parent').openCursor(IDBKeyRange.only(norm.path));
 
-      const skip = limit === -1 ? 0 : page * limit;
-      let skipped = false;
+      let toSkip = limit === -1 ? 0 : page * limit;
       let count = 0;
 
       req.onsuccess = (e) => {
         const cursor = (e.target as IDBRequest<IDBCursorWithValue | null>).result;
         if (!cursor) return;
-
-        if (!skipped && skip > 0) {
-          skipped = true;
-          cursor.advance(skip);
-          return;
-        }
-
-        if (limit !== -1 && count >= limit) return;
 
         const node = cursor.value as TableBuritiTypeBD;
         const item: ListItem = {
@@ -216,10 +207,21 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
           extension: node.type === 'file' ? node.extension : undefined
         };
 
-        if (!filter || filter(item)) {
-          results.push(item);
-          count++;
+        if (filter && !filter(item)) {
+          cursor.continue();
+          return;
         }
+
+        if (toSkip > 0) {
+          toSkip--;
+          cursor.continue();
+          return;
+        }
+
+        if (limit !== -1 && count >= limit) return;
+
+        results.push(item);
+        count++;
 
         if (limit !== -1 && count >= limit) return;
         cursor.continue();
