@@ -2,7 +2,7 @@
 
 
 
-import type { PropsClassAddNoteBD, PropsClassMainType, TableBuritiTypeBD } from "../types/general";
+import type { ListItem, PropsClassAddNoteBD, PropsClassMainType, TableBuritiTypeBD } from "../types/general";
 import InitStorageIndexedDB from "./init";
 
 export default class StorageIndexedDB extends InitStorageIndexedDB {
@@ -162,6 +162,72 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
 
     await this.copyNode({ fromPath, toPath, merge, priority });
     await this.removeNode({ path: fromNorm.path });
+  }
+
+  protected async listNodes({
+    pathRef,
+    recursive = false,
+    limit = -1,
+    page = 0,
+    filter
+  }: {
+    pathRef: string;
+    recursive?: boolean;
+    limit?: number;
+    page?: number;
+    filter?: (item: ListItem) => boolean;
+  }): Promise<ListItem[]> {
+
+    const norm = await this.pathTrated(pathRef);
+    if (!norm.table) throw new Error(`Path "${pathRef}" does not exist`);
+    if (norm.table.type !== 'folder') throw new Error(`Path "${pathRef}" is not a folder`);
+
+    return new Promise((resolve, reject) => {
+      const results: ListItem[] = [];
+      const transaction = this.db!.transaction('nodes', 'readonly');
+      const store = transaction.objectStore('nodes');
+
+      const req: IDBRequest<IDBCursorWithValue | null> = recursive
+        ? store.openCursor(IDBKeyRange.bound(norm.path + '/', norm.path + '/' + '\uffff'))
+        : store.index('parent').openCursor(IDBKeyRange.only(norm.path));
+
+      const skip = limit === -1 ? 0 : page * limit;
+      let skipped = false;
+      let count = 0;
+
+      req.onsuccess = (e) => {
+        const cursor = (e.target as IDBRequest<IDBCursorWithValue | null>).result;
+        if (!cursor) return;
+
+        if (!skipped && skip > 0) {
+          skipped = true;
+          cursor.advance(skip);
+          return;
+        }
+
+        if (limit !== -1 && count >= limit) return;
+
+        const node = cursor.value as TableBuritiTypeBD;
+        const item: ListItem = {
+          path: node.path,
+          type: node.type,
+          createdAt: node.createdAt,
+          updatedAt: node.updatedAt,
+          extension: node.type === 'file' ? node.extension : undefined
+        };
+
+        if (!filter || filter(item)) {
+          results.push(item);
+          count++;
+        }
+
+        if (limit !== -1 && count >= limit) return;
+        cursor.continue();
+      };
+
+      transaction.oncomplete = () => resolve(results);
+      transaction.onerror = (e) => reject((e.target as IDBTransaction).error);
+    });
   }
 
 }

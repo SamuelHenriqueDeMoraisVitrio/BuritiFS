@@ -7,6 +7,7 @@ export type PropsClassMainType = {name:string, ver?:number};
 export type PropsClassAddNoteBD = {path:string, type:'file'|'folder'};
 
 export type ReturnedErrorOrSucessExplorerType = {ok:false, error:string} | {ok:true, error:null};
+export type ListItem = { path:string; type:'file'|'folder'; createdAt:number; updatedAt:number; extension?:string; };
 export type ExplorerInfoData = { path:string; createdAt:number; updatedAt:number; extension?:string; };
 export type ReturnedExplorerInfoType = {ok:false, error:string} | ({ok:true, error:null} & ExplorerInfoData);
 export type ReturnedErrorExplorerType = {ok:false, error:string};
