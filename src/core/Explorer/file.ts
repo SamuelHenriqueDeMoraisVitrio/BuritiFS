@@ -16,6 +16,8 @@ export default class ExplorerFile {
     this.storage = storage;
   }
 
+  // ─── Refactor ─────────────────────────────────────────────
+
   async delete():Promise<ReturnedErrorOrSucessExplorerType>{
     return await this.storage.delete({path: this.base});
   }

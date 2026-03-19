@@ -16,8 +16,15 @@ export default class ExplorerFolder {
     this.storage = storage;
   }
 
+  // ─── Get ──────────────────────────────────────────────────
+
+  async get({name}:{name:string}):Promise<ReturnedExplorerFileType | ReturnedExplorerFolderType>{
+    const path = `${this.base}${name}`;
+    return await this.storage.source({path});
+  }
+
   // ─── New ──────────────────────────────────────────────────
-  
+
   async newFolder({name}:{name:string}):Promise<ReturnedExplorerFolderType>{
     const path = `${this.base}${name}`;
     return await this.storage.newFolder({path});
@@ -35,7 +42,6 @@ export default class ExplorerFolder {
   }
 
   // List
-  // Get 'aa' | 'aa/bb';
   // rename
 
 }
