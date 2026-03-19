@@ -24,6 +24,12 @@ export default class ExplorerFile {
     return await this.storage.source({path: to}) as ReturnedExplorerFileType;
   }
 
+  async move({to, merge, priority}:{to:string, merge?:boolean, priority?:'source'|'destination'}):Promise<ReturnedExplorerFileType>{
+    const result = await this.storage.move({fromPath: this.base, toPath: to, merge, priority});
+    if (!result.ok) return result;
+    return await this.storage.source({path: to}) as ReturnedExplorerFileType;
+  }
+
   async delete():Promise<ReturnedErrorOrSucessExplorerType>{
     return await this.storage.delete({path: this.base});
   }

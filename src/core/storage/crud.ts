@@ -140,6 +140,30 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
     }
   }
 
+  protected async moveNode({
+    fromPath,
+    toPath,
+    merge = false,
+    priority = 'source'
+  }: {
+    fromPath: string;
+    toPath: string;
+    merge?: boolean;
+    priority?: 'source' | 'destination';
+  }): Promise<void> {
+
+    if (fromPath === '/' || toPath === '/') throw new Error('Cannot move root node.');
+
+    const fromNorm = await this.pathTrated(fromPath);
+    const toNorm   = await this.pathTrated(toPath);
+
+    if (fromNorm.path === toNorm.path) throw new Error('Cannot move a node to itself.');
+    if (toNorm.path.startsWith(fromNorm.path + '/')) throw new Error('Cannot move a folder into one of its own descendants.');
+
+    await this.copyNode({ fromPath, toPath, merge, priority });
+    await this.removeNode({ path: fromNorm.path });
+  }
+
 }
 
 

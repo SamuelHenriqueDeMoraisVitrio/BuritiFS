@@ -97,6 +97,15 @@ export default class ExplorerTree extends StorageIndexedDB {
     }
   }
 
+  async move({fromPath, toPath, merge, priority}:{fromPath:string, toPath:string, merge?:boolean, priority?:'source'|'destination'}):Promise<ReturnedErrorOrSucessExplorerType>{
+    try {
+      await this.moveNode({fromPath, toPath, merge, priority});
+      return {ok:true, error:null};
+    } catch (e) {
+      return {ok:false, error:e instanceof Error ? e.message : String(e)};
+    }
+  }
+
   // mov
   // List
   // rename
