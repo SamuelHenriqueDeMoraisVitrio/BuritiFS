@@ -41,17 +41,21 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
 
   async removeNode({path}:{path:string}):Promise<void>{
 
-    if(path === '/') throw new Error('Mensagem de erro!');
+    if(path === '/') throw new Error('Cannot remove root node.');
 
     const node = await this.getSource({path});
 
-    if (node.type === 'file') await this.transact("readwrite", store => store.delete(node.path));
+    if (node.type === 'file'){
+      await this.transact("readwrite", store => store.delete(node.path));
+      return;
+    }
 
     if (node.type === 'folder'){
       await this.transact("readwrite", store => {
         store.delete(IDBKeyRange.bound(node.path+'/', (node.path+'/') + "\uffff"));
         store.delete(node.path);
       });
+      return;
     }
 
     throw new Error("Mensagem de erro!");
