@@ -1,7 +1,7 @@
 
 
 import StorageIndexedDB from "../storage/crud";
-import type { PropsClassMainType, ReturnedErrorExplorerType, ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType, ReturnedExplorerInfoType } from "../types/general";
+import type { ListItem, PropsClassMainType, ReturnedErrorExplorerType, ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType, ReturnedExplorerInfoType, ReturnedExplorerListType } from "../types/general";
 import ExplorerFile from "./file";
 import ExplorerFolder from "./folder";
 
@@ -128,7 +128,15 @@ export default class ExplorerTree extends StorageIndexedDB {
     }
   }
 
-  // List
+  async list({path, recursive, limit, page, filter}:{path:string, recursive?:boolean, limit?:number, page?:number, filter?:(item:ListItem)=>boolean}):Promise<ReturnedExplorerListType>{
+    try {
+      const items = await this.listNodes({pathRef: path, recursive, limit, page, filter});
+      return {ok:true, error:null, items};
+    } catch (e) {
+      return {ok:false, error:e instanceof Error ? e.message : String(e)};
+    }
+  }
+
   // zip. Talvez futuramente.
   // Sync Github. Talvez futuramente.
 

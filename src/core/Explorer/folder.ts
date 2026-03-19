@@ -1,6 +1,6 @@
 
 
-import type { ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType, ReturnedExplorerInfoType } from "../types/general";
+import type { ListItem, ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType, ReturnedExplorerInfoType, ReturnedExplorerListType } from "../types/general";
 import type ExplorerTree from "./ExplorerMain";
 
 export default class ExplorerFolder {
@@ -71,6 +71,10 @@ export default class ExplorerFolder {
 
   async delete():Promise<ReturnedErrorOrSucessExplorerType>{
     return await this.storage.delete({path: this.base});
+  }
+
+  async list({recursive, limit, page, filter}:{recursive?:boolean, limit?:number, page?:number, filter?:(item:ListItem)=>boolean}={}):Promise<ReturnedExplorerListType>{
+    return await this.storage.list({path: this.path, recursive, limit, page, filter});
   }
 
 }

@@ -10,6 +10,7 @@ export type ReturnedErrorOrSucessExplorerType = {ok:false, error:string} | {ok:t
 export type ListItem = { path:string; type:'file'|'folder'; createdAt:number; updatedAt:number; extension?:string; };
 export type ExplorerInfoData = { path:string; createdAt:number; updatedAt:number; extension?:string; };
 export type ReturnedExplorerInfoType = {ok:false, error:string} | ({ok:true, error:null} & ExplorerInfoData);
+export type ReturnedExplorerListType = {ok:false, error:string} | {ok:true, error:null, items:ListItem[]};
 export type ReturnedErrorExplorerType = {ok:false, error:string};
 export type ReturnedExplorerFolderType = ReturnedErrorExplorerType | ExplorerFolder;
 export type ReturnedExplorerFileType = ReturnedErrorExplorerType | ExplorerFile;
