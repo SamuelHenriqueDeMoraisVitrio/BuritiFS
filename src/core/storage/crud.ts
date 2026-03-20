@@ -188,8 +188,12 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
       const transaction = this.db!.transaction('nodes', 'readonly');
       const store = transaction.objectStore('nodes');
 
+      const recursiveRange = norm.path === '/'
+        ? IDBKeyRange.lowerBound('/', true)
+        : IDBKeyRange.bound(norm.path + '/', norm.path + '/' + '\uffff');
+
       const req: IDBRequest<IDBCursorWithValue | null> = recursive
-        ? store.openCursor(IDBKeyRange.bound(norm.path + '/', norm.path + '/' + '\uffff'))
+        ? store.openCursor(recursiveRange)
         : store.index('parent').openCursor(IDBKeyRange.only(norm.path));
 
       req.onsuccess = (e) => {
@@ -237,8 +241,12 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
       const transaction = this.db!.transaction('nodes', 'readonly');
       const store = transaction.objectStore('nodes');
 
+      const recursiveRange = norm.path === '/'
+        ? IDBKeyRange.lowerBound('/', true)
+        : IDBKeyRange.bound(norm.path + '/', norm.path + '/' + '\uffff');
+
       const req: IDBRequest<IDBCursorWithValue | null> = recursive
-        ? store.openCursor(IDBKeyRange.bound(norm.path + '/', norm.path + '/' + '\uffff'))
+        ? store.openCursor(recursiveRange)
         : store.index('parent').openCursor(IDBKeyRange.only(norm.path));
 
       let toSkip = limit === -1 ? 0 : page * limit;

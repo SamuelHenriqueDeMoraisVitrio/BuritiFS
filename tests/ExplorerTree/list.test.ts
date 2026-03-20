@@ -63,6 +63,23 @@ describe('ExplorerTree.list', () => {
       expect(paths).toContain('/pasta/sub/deep.txt');
     });
 
+    it('must list all descendants recursively from root', async () => {
+      const pasta = await root.newFolder({ name: 'pasta' });
+      if (!(pasta instanceof ExplorerFolder)) throw new Error('setup failed');
+      await pasta.newFile({ name: 'arquivo.txt' });
+      await root.newFile({ name: 'raiz.txt' });
+
+      const result = await tree.list({ path: '/', recursive: true });
+      expect(result.ok).toBe(true);
+      if (!result.ok) throw new Error('setup failed');
+
+      expect(result.items).toHaveLength(3);
+      const paths = result.items.map(i => i.path);
+      expect(paths).toContain('/pasta');
+      expect(paths).toContain('/pasta/arquivo.txt');
+      expect(paths).toContain('/raiz.txt');
+    });
+
     it('must return correct item shape', async () => {
       await root.newFile({ name: 'arquivo.txt' });
 
