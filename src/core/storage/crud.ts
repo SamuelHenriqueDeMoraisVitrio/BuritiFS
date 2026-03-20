@@ -206,7 +206,6 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
           type: node.type,
           createdAt: node.createdAt,
           updatedAt: node.updatedAt,
-          extension: node.type === 'file' ? node.extension : undefined
         };
 
         if (!filter || filter(item)) count++;
@@ -262,7 +261,6 @@ export default class StorageIndexedDB extends InitStorageIndexedDB {
           type: node.type,
           createdAt: node.createdAt,
           updatedAt: node.updatedAt,
-          extension: node.type === 'file' ? node.extension : undefined
         };
 
         if (filter && !filter(item)) {

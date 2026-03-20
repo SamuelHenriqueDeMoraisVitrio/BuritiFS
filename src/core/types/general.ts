@@ -7,8 +7,8 @@ export type PropsClassMainType = {name:string, ver?:number};
 export type PropsClassAddNoteBD = {path:string, type:'file'|'folder'};
 
 export type ReturnedErrorOrSucessExplorerType = {ok:false, error:string} | {ok:true, error:null};
-export type ListItem = { path:string; type:'file'|'folder'; createdAt:number; updatedAt:number; extension?:string; };
-export type ExplorerInfoData = { path:string; createdAt:number; updatedAt:number; extension?:string; };
+export type ListItem = { path:string; type:'file'|'folder'; createdAt:number; updatedAt:number; };
+export type ExplorerInfoData = { path:string; createdAt:number; updatedAt:number; };
 export type ReturnedExplorerInfoType = {ok:false, error:string} | ({ok:true, error:null} & ExplorerInfoData);
 export type ReturnedExplorerListType = {ok:false, error:string} | {ok:true, error:null, items:ListItem[]};
 export type ReturnedExplorerSizeType = {ok:false, error:string} | {ok:true, error:null, size:number};
@@ -29,7 +29,6 @@ interface TableBuritiTypeBDFolder extends TableBuritiTypeBDBase {
 
 interface TableBuritiTypeBDFile extends TableBuritiTypeBDBase {
   type: 'file';
-  extension?: string;
 };
 
 export type TableBuritiTypeBD = TableBuritiTypeBDFolder | TableBuritiTypeBDFile;

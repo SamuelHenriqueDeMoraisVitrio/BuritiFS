@@ -51,8 +51,7 @@ export default class ExplorerTree extends StorageIndexedDB {
   async info({path}:{path:string}):Promise<ReturnedExplorerInfoType>{
     try {
       const table = await this.getSource({path});
-      const extension = table.type === 'file' ? table.extension : undefined;
-      return {ok:true, error:null, path:table.path, createdAt:table.createdAt, updatedAt:table.updatedAt, extension};
+      return {ok:true, error:null, path:table.path, createdAt:table.createdAt, updatedAt:table.updatedAt};
     } catch (e) {
       return {ok:false, error:e instanceof Error ? e.message : String(e)};
     }

@@ -91,7 +91,6 @@ export default class InitStorageIndexedDB {
         const store = db.createObjectStore("nodes", { keyPath: "path", autoIncrement: true });
         store.createIndex("type", "type");
         store.createIndex("parent", "parent");
-        store.createIndex("extension", "extension");
       };
     });
   }

@@ -20,7 +20,6 @@ interface DBFolder extends DBNodeBase {
 
 interface DBFile extends DBNodeBase {
   type: 'file';
-  extension?: string;
 }
 
 type DBNode = DBFolder | DBFile;
@@ -210,25 +209,6 @@ export async function getChildren(
       const index = tx.objectStore(STORE_NAME).index('parent');
       const req = index.getAll(parentPath);
       req.onsuccess = () => { db.close(); resolve(req.result as DBNode[]); };
-      req.onerror = () => { db.close(); reject(req.error); };
-    });
-  });
-}
-
-/**
- * Retorna todos os arquivos com uma extensão específica (ex: 'txt', 'json').
- */
-export async function getFilesByExtension(
-  dbName: string,
-  extension: string
-): Promise<HelperResult<DBFile[]>> {
-  return wrap(async () => {
-    const db = await openRaw(dbName);
-    return new Promise<DBFile[]>((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, 'readonly');
-      const index = tx.objectStore(STORE_NAME).index('extension');
-      const req = index.getAll(extension);
-      req.onsuccess = () => { db.close(); resolve(req.result as DBFile[]); };
       req.onerror = () => { db.close(); reject(req.error); };
     });
   });

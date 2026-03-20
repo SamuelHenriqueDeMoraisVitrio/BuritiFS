@@ -29,7 +29,6 @@ describe('ExplorerFolder.info', () => {
       expect(info.path).toBe(raw.data.path);
       expect(info.createdAt).toBe(raw.data.createdAt);
       expect(info.updatedAt).toBe(raw.data.updatedAt);
-      expect(info.extension).toBeUndefined();
     });
 
     it('must return info for root folder', async () => {
