@@ -52,5 +52,9 @@ export default class ExplorerFile {
   async delete():Promise<ReturnedErrorOrSucessExplorerType>{
     return await this.storage.delete({path: this.base});
   }
+
+  async exists():Promise<boolean>{
+    return await this.storage.exists({path: this.base});
+  }
 }
 

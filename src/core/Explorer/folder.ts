@@ -1,6 +1,6 @@
 
 
-import type { ListItem, ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType, ReturnedExplorerInfoType, ReturnedExplorerListType } from "../types/general";
+import type { ListItem, ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType, ReturnedExplorerInfoType, ReturnedExplorerListType, ReturnedExplorerSizeType } from "../types/general";
 import type ExplorerTree from "./ExplorerMain";
 
 export default class ExplorerFolder {
@@ -75,6 +75,14 @@ export default class ExplorerFolder {
 
   async list({recursive, limit, page, filter}:{recursive?:boolean, limit?:number, page?:number, filter?:(item:ListItem)=>boolean}={}):Promise<ReturnedExplorerListType>{
     return await this.storage.list({path: this.path, recursive, limit, page, filter});
+  }
+
+  async exists():Promise<boolean>{
+    return await this.storage.exists({path: this.path});
+  }
+
+  async size({recursive, filter}:{recursive?:boolean, filter?:(item:ListItem)=>boolean}={}):Promise<ReturnedExplorerSizeType>{
+    return await this.storage.size({path: this.path, recursive, filter});
   }
 
 }
