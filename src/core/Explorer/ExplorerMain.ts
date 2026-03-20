@@ -139,7 +139,6 @@ export default class ExplorerTree extends StorageIndexedDB {
 
   // zip. Talvez futuramente.
   // Sync Github. Talvez futuramente.
-
 }
 
 
