@@ -3,7 +3,7 @@
 import type { PropsClassMainType, TableBuritiTypeBD } from "../types/general";
 import validatePath from "../utils";
 
-export default class InitStorageIndexedDB {
+export default class IDBSetup {
 
   private static registry = new Map<string, IDBDatabase>();
 
@@ -74,7 +74,7 @@ export default class InitStorageIndexedDB {
 
       request.onsuccess = (event) => {
         this.db = (event.target as IDBOpenDBRequest).result;
-        InitStorageIndexedDB.registry.set(this.dbName, this.db);
+        IDBSetup.registry.set(this.dbName, this.db);
         resolve();
       };
 
@@ -96,10 +96,10 @@ export default class InitStorageIndexedDB {
   }
 
   static close({name}:{name: string}): void {
-    const db = InitStorageIndexedDB.registry.get(name);
+    const db = IDBSetup.registry.get(name);
     if (db) {
       db.close();
-      InitStorageIndexedDB.registry.delete(name);
+      IDBSetup.registry.delete(name);
     }
   }
 }

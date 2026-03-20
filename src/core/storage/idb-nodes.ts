@@ -3,9 +3,9 @@
 
 
 import type { ListItem, PropsClassAddNoteBD, PropsClassMainType, TableBuritiTypeBD } from "../types/general";
-import InitStorageIndexedDB from "./init";
+import IDBSetup from "./idb-setup";
 
-export default class StorageIndexedDB extends InitStorageIndexedDB {
+export default class IDBNodes extends IDBSetup {
 
   constructor(props:PropsClassMainType){
     super(props);

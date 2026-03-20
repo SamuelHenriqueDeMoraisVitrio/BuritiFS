@@ -1,12 +1,12 @@
 
 
-import StorageIndexedDB from "../storage/crud";
+import IDBNodes from "../storage/idb-nodes";
 import type { ListItem, PropsClassMainType, ReturnedErrorExplorerType, ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType, ReturnedExplorerInfoType, ReturnedExplorerListType, ReturnedExplorerSizeType } from "../types/general";
 import ExplorerFile from "./file";
 import ExplorerFolder from "./folder";
 
 
-export default class ExplorerTree extends StorageIndexedDB {
+export default class ExplorerTree extends IDBNodes {
 
   private constructor(props:PropsClassMainType){
     super(props);
