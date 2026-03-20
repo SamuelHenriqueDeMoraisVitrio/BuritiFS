@@ -88,7 +88,7 @@ export default class InitStorageIndexedDB {
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
-        const store = db.createObjectStore("nodes", { keyPath: "path" });
+        const store = db.createObjectStore("nodes", { keyPath: "path", autoIncrement: true });
         store.createIndex("type", "type");
         store.createIndex("parent", "parent");
         store.createIndex("extension", "extension");
