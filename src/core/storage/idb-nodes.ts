@@ -32,16 +32,24 @@ export default class IDBNodes extends OPFSStorage {
     if(propsTrated.table && propsTrated.table.type !== type) throw new Error(`Path "${path}" already exists as a "${propsTrated.table.type}"`);
 
     const now = Date.now();
+    
+    let contentId:string = String(crypto.getRandomValues(new Uint32Array(1))[0]);
+    if (propsTrated.table?.type === 'file') {
+      contentId = propsTrated.table.contentId ? propsTrated.table.contentId : contentId;
+    }
 
-    await this.transact("readwrite", (store) => {
-      store.put({
-        path:propsTrated.path,
-        parent:propsTrated.parent,
-        type,
-        createdAt: propsTrated.table ? propsTrated.table.createdAt : now,
-        updatedAt: now
-      });
-    });
+    const responseAddNodeBase = {
+      path:propsTrated.path,
+      parent:propsTrated.parent,
+      createdAt: propsTrated.table ? propsTrated.table.createdAt : now,
+      updatedAt: now,
+    }
+
+    const responseAddNode:TableBuritiTypeBD = type === 'file' ?
+      {...responseAddNodeBase, type:'file', contentId} :
+      {...responseAddNodeBase, type:"folder"};
+
+    await this.transact("readwrite", (store) => store.put(responseAddNode));
   }
 
   protected async removeNode({path}:{path:string}):Promise<void>{
