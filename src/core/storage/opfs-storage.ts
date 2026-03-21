@@ -15,8 +15,8 @@ export default class OPFSStorage extends IDBSetup {
     return new OPFSStorage(props, root);
   }
 
-  async write(id: number, content: ArrayBuffer | string | object): Promise<void> {
-    const fileHandle = await this.root.getFileHandle(String(id), { create: true });
+  async write(id: string, content: ArrayBuffer | string | object): Promise<void> {
+    const fileHandle = await this.root.getFileHandle(id, { create: true });
     const writable = await fileHandle.createWritable();
     const data = typeof content === "object" && !(content instanceof ArrayBuffer)
       ? JSON.stringify(content)
@@ -25,25 +25,25 @@ export default class OPFSStorage extends IDBSetup {
     await writable.close();
   }
 
-  async read(id: number): Promise<ArrayBuffer> {
-    const fileHandle = await this.root.getFileHandle(String(id));
+  async read(id: string): Promise<ArrayBuffer> {
+    const fileHandle = await this.root.getFileHandle(id);
     const file = await fileHandle.getFile();
     return await file.arrayBuffer();
   }
 
-  async readText(id: number): Promise<string> {
-    const fileHandle = await this.root.getFileHandle(String(id));
+  async readText(id: string): Promise<string> {
+    const fileHandle = await this.root.getFileHandle(id);
     const file = await fileHandle.getFile();
     return await file.text();
   }
 
-  async delete(id: number): Promise<void> {
-    await this.root.removeEntry(String(id));
+  async delete(id: string): Promise<void> {
+    await this.root.removeEntry(id);
   }
 
-  async exists(id: number): Promise<boolean> {
+  async exists(id: string): Promise<boolean> {
     try {
-      await this.root.getFileHandle(String(id));
+      await this.root.getFileHandle(id);
       return true;
     } catch {
       return false;

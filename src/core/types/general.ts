@@ -29,6 +29,7 @@ interface TableBuritiTypeBDFolder extends TableBuritiTypeBDBase {
 
 interface TableBuritiTypeBDFile extends TableBuritiTypeBDBase {
   type: 'file';
+  contentId: string;
 };
 
 export type TableBuritiTypeBD = TableBuritiTypeBDFolder | TableBuritiTypeBDFile;
