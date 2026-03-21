@@ -122,13 +122,11 @@ export default class IDBRefactor extends IDBQuery {
   protected async moveNode({
     fromPath,
     toPath,
-    merge = false,
-    priority = 'source',
+    force = false,
   }: {
     fromPath: string;
     toPath: string;
-    merge?: boolean;
-    priority?: 'source' | 'destination';
+    force?: boolean;
   }): Promise<void> {
     if (fromPath === '/' || toPath === '/') throw new Error('Cannot move root node.');
     const fromNorm = await this.pathTrated(fromPath);
@@ -137,15 +135,10 @@ export default class IDBRefactor extends IDBQuery {
     if (toNorm.path.startsWith(fromNorm.path + '/')) throw new Error('Cannot move a folder into one of its own descendants.');
 
     const fromEntity = await this.getSource({ path: fromPath });
-    const destIsFile = toNorm.table?.type === 'file';
     const destExists = !!toNorm.table;
 
-    if (priority === 'destination') {
-      if (!merge && destExists) return;
-      if (destIsFile) return;
-    }
-
-    if (destExists && (!merge || destIsFile)) {
+    if (destExists) {
+      if (!force) throw new Error(`Destination "${toNorm.path}" already exists.`);
       await this.removeNode({ path: toNorm.path });
     }
 
@@ -179,12 +172,6 @@ export default class IDBRefactor extends IDBQuery {
         if (node.status === 'pending') continue;
         const newPath = remap(node.path);
         const newParent = remapParent(node.parent);
-        const skipExisting = merge && priority === 'destination';
-
-        if (skipExisting) {
-          const exists = await this.existsNode({ path: newPath });
-          if (exists) continue;
-        }
 
         await this.transact('readwrite', store => {
           store.delete(node.path);

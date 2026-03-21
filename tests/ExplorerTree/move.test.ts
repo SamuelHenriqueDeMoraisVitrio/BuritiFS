@@ -32,40 +32,16 @@ describe('ExplorerTree.move', () => {
       expect(await checkIntegrity('testeBanco')).toEqual([]);
     });
 
-    it('must overwrite destination file when priority is source', async () => {
+    it('must overwrite destination file when force is true', async () => {
       await root.newFile({ name: 'arquivo.txt' });
       await root.newFile({ name: 'movido.txt' });
 
-      const result = await tree.move({ fromPath: '/arquivo.txt', toPath: '/movido.txt', priority: 'source' });
+      const result = await tree.move({ fromPath: '/arquivo.txt', toPath: '/movido.txt', force: true });
       expect(result.ok).toBe(true);
 
       expect(await nodeExists('testeBanco', '/arquivo.txt')).toBe(false);
       expect(await nodeExistsAs('testeBanco', '/movido.txt', 'file')).toBe(true);
       expect(await checkIntegrity('testeBanco')).toEqual([]);
-    });
-
-    it('must keep destination and remove source when priority is destination and destination exists', async () => {
-      await root.newFile({ name: 'arquivo.txt' });
-      await root.newFile({ name: 'movido.txt' });
-
-      const destinoBefore = await getNodeByPath('testeBanco', '/movido.txt');
-
-      const result = await tree.move({ fromPath: '/arquivo.txt', toPath: '/movido.txt', priority: 'destination' });
-      expect(result.ok).toBe(true);
-
-      expect(await nodeExists('testeBanco', '/arquivo.txt')).toBe(false);
-      const destinoAfter = await getNodeByPath('testeBanco', '/movido.txt');
-      expect(destinoBefore).toEqual(destinoAfter);
-    });
-
-    it('must move file when priority is destination and destination does not exist', async () => {
-      await root.newFile({ name: 'arquivo.txt' });
-
-      const result = await tree.move({ fromPath: '/arquivo.txt', toPath: '/movido.txt', priority: 'destination' });
-      expect(result.ok).toBe(true);
-
-      expect(await nodeExists('testeBanco', '/arquivo.txt')).toBe(false);
-      expect(await nodeExistsAs('testeBanco', '/movido.txt', 'file')).toBe(true);
     });
   });
 
@@ -117,7 +93,7 @@ describe('ExplorerTree.move', () => {
       expect(await checkIntegrity('testeBanco')).toEqual([]);
     });
 
-    it('must replace destination folder when merge is false and priority is source', async () => {
+    it('must replace destination folder when force is true', async () => {
       const pasta = await root.newFolder({ name: 'pasta' });
       if (!(pasta instanceof ExplorerFolder)) throw new Error('setup failed');
       await pasta.newFile({ name: 'fonte.txt' });
@@ -126,7 +102,7 @@ describe('ExplorerTree.move', () => {
       if (!(destino instanceof ExplorerFolder)) throw new Error('setup failed');
       await destino.newFile({ name: 'destino.txt' });
 
-      const result = await tree.move({ fromPath: '/pasta', toPath: '/movida', merge: false, priority: 'source' });
+      const result = await tree.move({ fromPath: '/pasta', toPath: '/movida', force: true });
       expect(result.ok).toBe(true);
 
       expect(await nodeExists('testeBanco', '/pasta')).toBe(false);
@@ -135,96 +111,11 @@ describe('ExplorerTree.move', () => {
       expect(await checkIntegrity('testeBanco')).toEqual([]);
     });
 
-    it('must keep destination and remove source when merge is false and priority is destination and it exists', async () => {
-      const pasta = await root.newFolder({ name: 'pasta' });
-      if (!(pasta instanceof ExplorerFolder)) throw new Error('setup failed');
-      await pasta.newFile({ name: 'fonte.txt' });
-
-      const destino = await root.newFolder({ name: 'movida' });
-      if (!(destino instanceof ExplorerFolder)) throw new Error('setup failed');
-      await destino.newFile({ name: 'destino.txt' });
-
-      const result = await tree.move({ fromPath: '/pasta', toPath: '/movida', merge: false, priority: 'destination' });
-      expect(result.ok).toBe(true);
-
-      expect(await nodeExists('testeBanco', '/pasta')).toBe(false);
-      expect(await nodeExists('testeBanco', '/movida/fonte.txt')).toBe(false);
-      expect(await nodeExistsAs('testeBanco', '/movida/destino.txt', 'file')).toBe(true);
-    });
-
-    it('must move folder when merge is false and priority is destination but destination does not exist', async () => {
-      const pasta = await root.newFolder({ name: 'pasta' });
-      if (!(pasta instanceof ExplorerFolder)) throw new Error('setup failed');
-      await pasta.newFile({ name: 'arquivo.txt' });
-
-      const result = await tree.move({ fromPath: '/pasta', toPath: '/movida', merge: false, priority: 'destination' });
-      expect(result.ok).toBe(true);
-
-      expect(await nodeExists('testeBanco', '/pasta')).toBe(false);
-      expect(await nodeExistsAs('testeBanco', '/movida', 'folder')).toBe(true);
-      expect(await nodeExistsAs('testeBanco', '/movida/arquivo.txt', 'file')).toBe(true);
-    });
-
-    it('must merge and source wins on conflict when merge is true and priority is source', async () => {
-      const pasta = await root.newFolder({ name: 'pasta' });
-      if (!(pasta instanceof ExplorerFolder)) throw new Error('setup failed');
-      await pasta.newFile({ name: 'comum.txt' });
-      await pasta.newFile({ name: 'so-fonte.txt' });
-
-      const destino = await root.newFolder({ name: 'movida' });
-      if (!(destino instanceof ExplorerFolder)) throw new Error('setup failed');
-      await destino.newFile({ name: 'comum.txt' });
-      await destino.newFile({ name: 'so-destino.txt' });
-
-      const result = await tree.move({ fromPath: '/pasta', toPath: '/movida', merge: true, priority: 'source' });
-      expect(result.ok).toBe(true);
-
-      expect(await nodeExists('testeBanco', '/pasta')).toBe(false);
-      expect(await nodeExistsAs('testeBanco', '/movida/comum.txt', 'file')).toBe(true);
-      expect(await nodeExistsAs('testeBanco', '/movida/so-fonte.txt', 'file')).toBe(true);
-      expect(await nodeExistsAs('testeBanco', '/movida/so-destino.txt', 'file')).toBe(true);
-      expect(await checkIntegrity('testeBanco')).toEqual([]);
-    });
-
-    it('must merge and destination wins on conflict when merge is true and priority is destination', async () => {
-      const pasta = await root.newFolder({ name: 'pasta' });
-      if (!(pasta instanceof ExplorerFolder)) throw new Error('setup failed');
-      await pasta.newFile({ name: 'comum.txt' });
-      await pasta.newFile({ name: 'so-fonte.txt' });
-
-      const destino = await root.newFolder({ name: 'movida' });
-      if (!(destino instanceof ExplorerFolder)) throw new Error('setup failed');
-      await destino.newFile({ name: 'comum.txt' });
-      await destino.newFile({ name: 'so-destino.txt' });
-
-      const destinoBefore = await getNodeByPath('testeBanco', '/movida/comum.txt');
-
-      const result = await tree.move({ fromPath: '/pasta', toPath: '/movida', merge: true, priority: 'destination' });
-      expect(result.ok).toBe(true);
-
-      expect(await nodeExists('testeBanco', '/pasta')).toBe(false);
-      const destinoAfter = await getNodeByPath('testeBanco', '/movida/comum.txt');
-      expect(destinoBefore).toEqual(destinoAfter);
-      expect(await nodeExistsAs('testeBanco', '/movida/so-fonte.txt', 'file')).toBe(true);
-      expect(await nodeExistsAs('testeBanco', '/movida/so-destino.txt', 'file')).toBe(true);
-    });
-
-    it('must not move folder over a file when merge is true and priority is destination', async () => {
+    it('must replace a file with a folder when force is true', async () => {
       await root.newFolder({ name: 'pasta' });
       await root.newFile({ name: 'movida' });
 
-      const result = await tree.move({ fromPath: '/pasta', toPath: '/movida', merge: true, priority: 'destination' });
-      expect(result.ok).toBe(true);
-
-      expect(await nodeExists('testeBanco', '/pasta')).toBe(false);
-      expect(await nodeExistsAs('testeBanco', '/movida', 'file')).toBe(true);
-    });
-
-    it('must replace file with folder when merge is false and priority is source', async () => {
-      await root.newFolder({ name: 'pasta' });
-      await root.newFile({ name: 'movida' });
-
-      const result = await tree.move({ fromPath: '/pasta', toPath: '/movida', merge: false, priority: 'source' });
+      const result = await tree.move({ fromPath: '/pasta', toPath: '/movida', force: true });
       expect(result.ok).toBe(true);
 
       expect(await nodeExists('testeBanco', '/pasta')).toBe(false);
@@ -276,6 +167,15 @@ describe('ExplorerTree.move', () => {
       const result = await tree.move({ fromPath: '/arquivo.txt', toPath: '/nonexistent/movido.txt' });
       expect(result.ok).toBe(false);
       expect(result.error).toContain('does not exist');
+    });
+
+    it('must return error when destination exists and force is false', async () => {
+      await root.newFile({ name: 'arquivo.txt' });
+      await root.newFile({ name: 'movido.txt' });
+
+      const result = await tree.move({ fromPath: '/arquivo.txt', toPath: '/movido.txt' });
+      expect(result.ok).toBe(false);
+      expect(typeof result.error).toBe('string');
     });
   });
 

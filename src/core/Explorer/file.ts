@@ -41,8 +41,8 @@ export default class ExplorerFile {
     return await this.storage.source({path: to}) as ReturnedExplorerFileType;
   }
 
-  async move({to, merge, priority}:{to:string, merge?:boolean, priority?:'source'|'destination'}):Promise<ReturnedErrorOrSucessExplorerType>{
-    const result = await this.storage.move({fromPath: this.base, toPath: to, merge, priority});
+  async move({to, force}:{to:string, force?:boolean}):Promise<ReturnedErrorOrSucessExplorerType>{
+    const result = await this.storage.move({fromPath: this.base, toPath: to, force});
     if (!result.ok) return result;
     const newInstance = await this.storage.source({path: to});
     if (newInstance instanceof ExplorerFile) this.base = newInstance.base;

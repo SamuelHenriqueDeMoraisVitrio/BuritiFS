@@ -106,9 +106,9 @@ export default class ExplorerTree extends StorageInit {
     }
   }
 
-  async move({fromPath, toPath, merge, priority}:{fromPath:string, toPath:string, merge?:boolean, priority?:'source'|'destination'}):Promise<ReturnedErrorOrSucessExplorerType>{
+  async move({fromPath, toPath, force}:{fromPath:string, toPath:string, force?:boolean}):Promise<ReturnedErrorOrSucessExplorerType>{
     try {
-      await this.moveNode({fromPath, toPath, merge, priority});
+      await this.moveNode({fromPath, toPath, force});
       return {ok:true, error:null};
     } catch (e) {
       return {ok:false, error:e instanceof Error ? e.message : String(e)};
