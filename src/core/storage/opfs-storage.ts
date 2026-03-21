@@ -2,20 +2,17 @@ import { PropsClassMainType } from "../types/general";
 import IDBSetup from "./idb-setup";
 
 
+//const root = await navigator.storage.getDirectory();
 export default class OPFSStorage extends IDBSetup {
   private root: FileSystemDirectoryHandle; // sem null
 
-  private constructor(props: PropsClassMainType, root: FileSystemDirectoryHandle) {
+  constructor(props: PropsClassMainType) {
     super(props);
-    this.root = root;
+    this.root = props.rootOPFS;
+    if (!this.root) throw new Error("Mensagem de erro");
   }
 
-  static async init(props: PropsClassMainType): Promise<OPFSStorage> {
-    const root = await navigator.storage.getDirectory();
-    return new OPFSStorage(props, root);
-  }
-
-  async write(id: string, content: ArrayBuffer | string | object): Promise<void> {
+  protected async write(id: string, content: ArrayBuffer | string | object): Promise<void> {
     const fileHandle = await this.root.getFileHandle(id, { create: true });
     const writable = await fileHandle.createWritable();
     const data = typeof content === "object" && !(content instanceof ArrayBuffer)
@@ -25,23 +22,23 @@ export default class OPFSStorage extends IDBSetup {
     await writable.close();
   }
 
-  async read(id: string): Promise<ArrayBuffer> {
+  protected async read(id: string): Promise<ArrayBuffer> {
     const fileHandle = await this.root.getFileHandle(id);
     const file = await fileHandle.getFile();
     return await file.arrayBuffer();
   }
 
-  async readText(id: string): Promise<string> {
+  protected async readText(id: string): Promise<string> {
     const fileHandle = await this.root.getFileHandle(id);
     const file = await fileHandle.getFile();
     return await file.text();
   }
 
-  async delete(id: string): Promise<void> {
+  protected async delete(id: string): Promise<void> {
     await this.root.removeEntry(id);
   }
 
-  async exists(id: string): Promise<boolean> {
+  protected async exists(id: string): Promise<boolean> {
     try {
       await this.root.getFileHandle(id);
       return true;
