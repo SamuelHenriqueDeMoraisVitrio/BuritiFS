@@ -21,6 +21,7 @@ export default class IDBRefactor extends IDBQuery {
   }): Promise<void> {
 
     if (fromPath === '/' || toPath === '/') throw new Error('Cannot copy root node.');
+    if (fromPath === toPath) throw new Error('Cannot copy a node to itself.');
 
     const fromEntity = await this.getSource({ path: fromPath });
     const toEntityProps = await this.pathTrated(toPath);
@@ -35,54 +36,86 @@ export default class IDBRefactor extends IDBQuery {
           : remap(oldParent);
 
     // ─── File ─────────────────────────────────────────────────
-
     if (fromEntity.type === 'file') {
       if (priority === 'destination' && !!toEntityProps.table) return;
       if (!!toEntityProps.table) await this.removeNode({ path: toEntityProps.path });
-      await this.transact('readwrite', (store) => {
-        store.put({ ...fromEntity, path: toEntityProps.path, parent: toEntityProps.parent, updatedAt: now });
-      });
+
+      const newContentId = String(crypto.getRandomValues(new Uint32Array(1))[0]);
+      const content = await this.readStorage(fromEntity.contentId);
+
+      await this.withWAL(
+        {
+          path: toEntityProps.path,
+          parent: toEntityProps.parent,
+          type: 'file',
+          contentId: newContentId,
+          createdAt: fromEntity.createdAt,
+          updatedAt: now,
+        } as TableBuritiTypeBD,
+        async () => await this.writeStorage(newContentId, content)
+      );
       return;
     }
 
     // ─── Folder ───────────────────────────────────────────────
-
     if (fromEntity.type === 'folder') {
+      const destIsFile = toEntityProps.table?.type === 'file';
+      const destExists = !!toEntityProps.table;
 
       if (priority === 'destination') {
-        if (!merge && !!toEntityProps.table) return;
-        if (toEntityProps.table?.type === 'file') return;
+        if (!merge && destExists) return;
+        if (destIsFile) return;
       }
 
-      if (!merge && !!toEntityProps.table) await this.removeNode({ path: toEntityProps.path });
-      else if (toEntityProps.table?.type === 'file') await this.removeNode({ path: toEntityProps.path });
+      if (destExists && (!merge || destIsFile)) {
+        await this.removeNode({ path: toEntityProps.path });
+      }
 
       await this.addNode({ path: toEntityProps.path, type: 'folder' });
 
       const range = IDBKeyRange.bound(fromEntity.path + '/', fromEntity.path + '/' + '\uffff');
+      const skipExisting = merge && priority === 'destination';
 
-      await this.transact('readwrite', (store) => {
-        const req = store.openCursor(range);
-        req.onsuccess = (event) => {
-          const cursor = (event.target as IDBRequest<IDBCursorWithValue | null>).result;
-          if (!cursor) return;
+      // Busca todos os filhos para poder duplicar arquivos no OPFS
+      const children = await this.request<TableBuritiTypeBD[]>('readonly', store => store.getAll(range));
 
-          const node = cursor.value as TableBuritiTypeBD;
-          const newPath = remap(node.path);
-          const newParent = remapParent(node.parent);
+      for (const node of children) {
+        if (node.status === 'pending') continue;
+        const newPath = remap(node.path);
+        const newParent = remapParent(node.parent);
 
-          if (merge && priority === 'destination') {
-            const check = store.get(newPath);
-            check.onsuccess = () => {
-              if (!check.result) store.put({ ...node, path: newPath, parent: newParent, updatedAt: now });
-              cursor.continue();
-            };
+        if (node.type === 'folder') {
+          if (skipExisting) {
+            const exists = await this.existsNode({ path: newPath });
+            if (!exists) await this.addNode({ path: newPath, type: 'folder' });
           } else {
-            store.put({ ...node, path: newPath, parent: newParent, updatedAt: now });
-            cursor.continue();
+            await this.addNode({ path: newPath, type: 'folder' });
           }
-        };
-      });
+          continue;
+        }
+
+        if (node.type === 'file') {
+          if (skipExisting) {
+            const exists = await this.existsNode({ path: newPath });
+            if (exists) continue;
+          }
+
+          const newContentId = String(crypto.getRandomValues(new Uint32Array(1))[0]);
+          const content = await this.readStorage(node.contentId);
+
+          await this.withWAL(
+            {
+              path: newPath,
+              parent: newParent,
+              type: 'file',
+              contentId: newContentId,
+              createdAt: node.createdAt,
+              updatedAt: now,
+            } as TableBuritiTypeBD,
+            async () => await this.writeStorage(newContentId, content)
+          );
+        }
+      }
     }
   }
 
@@ -97,16 +130,67 @@ export default class IDBRefactor extends IDBQuery {
     merge?: boolean;
     priority?: 'source' | 'destination';
   }): Promise<void> {
-
     if (fromPath === '/' || toPath === '/') throw new Error('Cannot move root node.');
-
     const fromNorm = await this.pathTrated(fromPath);
-    const toNorm   = await this.pathTrated(toPath);
-
+    const toNorm = await this.pathTrated(toPath);
     if (fromNorm.path === toNorm.path) throw new Error('Cannot move a node to itself.');
     if (toNorm.path.startsWith(fromNorm.path + '/')) throw new Error('Cannot move a folder into one of its own descendants.');
 
-    await this.copyNode({ fromPath, toPath, merge, priority });
-    await this.removeNode({ path: fromNorm.path });
+    const fromEntity = await this.getSource({ path: fromPath });
+    const destIsFile = toNorm.table?.type === 'file';
+    const destExists = !!toNorm.table;
+
+    if (priority === 'destination') {
+      if (!merge && destExists) return;
+      if (destIsFile) return;
+    }
+
+    if (destExists && (!merge || destIsFile)) {
+      await this.removeNode({ path: toNorm.path });
+    }
+
+    const now = Date.now();
+    const remap = (oldPath: string) => toNorm.path + oldPath.slice(fromNorm.path.length);
+    const remapParent = (oldParent: string | null): string | null =>
+      oldParent === null
+        ? null
+        : oldParent === fromNorm.path
+          ? toNorm.path
+          : remap(oldParent);
+
+    if (fromEntity.type === 'file') {
+      await this.transact('readwrite', store => {
+        store.delete(fromNorm.path);
+        store.put({ ...fromEntity, path: toNorm.path, parent: toNorm.parent, updatedAt: now });
+      });
+      return;
+    }
+
+    if (fromEntity.type === 'folder') {
+      const range = IDBKeyRange.bound(fromNorm.path + '/', fromNorm.path + '/' + '\uffff');
+      const children = await this.request<TableBuritiTypeBD[]>('readonly', store => store.getAll(range));
+
+      await this.transact('readwrite', store => {
+        store.delete(fromNorm.path);
+        store.put({ ...fromEntity, path: toNorm.path, parent: toNorm.parent, updatedAt: now });
+      });
+
+      for (const node of children) {
+        if (node.status === 'pending') continue;
+        const newPath = remap(node.path);
+        const newParent = remapParent(node.parent);
+        const skipExisting = merge && priority === 'destination';
+
+        if (skipExisting) {
+          const exists = await this.existsNode({ path: newPath });
+          if (exists) continue;
+        }
+
+        await this.transact('readwrite', store => {
+          store.delete(node.path);
+          store.put({ ...node, path: newPath, parent: newParent, updatedAt: now });
+        });
+      }
+    }
   }
 }
