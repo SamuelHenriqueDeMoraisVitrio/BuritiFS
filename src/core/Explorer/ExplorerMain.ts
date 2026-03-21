@@ -15,7 +15,7 @@ export default class ExplorerTree extends IDBNodes {
   static async create(props:PropsClassMainType):Promise<ExplorerTree | ReturnedErrorExplorerType>{
     const instance = new ExplorerTree(props);
     try {
-      await instance.openDB();
+      await instance.initExplorerData();
       const now = Date.now();
       const existing = await instance.request<{ createdAt: number } | null>('readonly', store => store.get('/'));
       await instance.transact("readwrite", (store) => {

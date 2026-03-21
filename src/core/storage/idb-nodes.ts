@@ -3,12 +3,17 @@
 
 
 import type { ListItem, PropsClassAddNoteBD, PropsClassMainType, TableBuritiTypeBD } from "../types/general";
-import IDBSetup from "./idb-setup";
+import OPFSStorage from "./opfs-storage";
 
-export default class IDBNodes extends IDBSetup {
+export default class IDBNodes extends OPFSStorage {
 
   constructor(props:PropsClassMainType){
     super(props);
+  }
+
+  protected async initExplorerData(){
+    await this.openDB();
+    await this.openStorage();
   }
 
   protected async getSource(props:{path:string}):Promise<TableBuritiTypeBD>{

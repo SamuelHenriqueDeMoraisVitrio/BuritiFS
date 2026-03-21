@@ -2,7 +2,7 @@ import ExplorerFile from "../Explorer/file";
 import ExplorerFolder from "../Explorer/folder";
 
 
-export type PropsClassMainType = {name:string, rootOPFS:FileSystemDirectoryHandle, ver?:number};
+export type PropsClassMainType = {name:string, ver?:number};
 
 export type PropsClassAddNoteBD = {path:string, type:'file'|'folder'};
 
