@@ -1,12 +1,12 @@
 
 
-import IDBNodes from "../storage/idb-nodes";
-import type { ListItem, PropsClassMainType, ReturnedErrorExplorerType, ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType, ReturnedExplorerInfoType, ReturnedExplorerListType, ReturnedExplorerSizeType } from "../types/general";
+import StorageInit from "../storage/storage-init";
+import type { ListItem, PropsClassMainType, ReturnedErrorExplorerType, ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType, ReturnedExplorerInfoType, ReturnedExplorerListType, ReturnedExplorerSizeType, TableBuritiTypeBD } from "../types/general";
 import ExplorerFile from "./file";
 import ExplorerFolder from "./folder";
 
 
-export default class ExplorerTree extends IDBNodes {
+export default class ExplorerTree extends StorageInit {
 
   private constructor(props:PropsClassMainType){
     super(props);
@@ -18,15 +18,15 @@ export default class ExplorerTree extends IDBNodes {
       await instance.initExplorerData();
       const now = Date.now();
       const existing = await instance.request<{ createdAt: number } | null>('readonly', store => store.get('/'));
-      await instance.transact("readwrite", (store) => {
-        store.put({
+      const objectPathRootInitialize:TableBuritiTypeBD = {
           path:'/',
           type:'folder',
           parent:null,
           createdAt: existing?.createdAt ?? now,
-          updatedAt: now
-        });
-      });
+          updatedAt: now,
+          status: "ready"
+        }
+      await instance.transact("readwrite", (store) => store.put(objectPathRootInitialize));
     } catch (e) {
       return {ok:false, error:e instanceof Error ? e.message : String(e)};
     }

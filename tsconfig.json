@@ -6,7 +6,7 @@
     "declaration": true,
     "declarationMap": true,
     "strict": true,
-    "lib": ["ES2020", "DOM"],
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "outDir": "dist"
   },
   "include": ["src"]

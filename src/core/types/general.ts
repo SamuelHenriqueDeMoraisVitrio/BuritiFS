@@ -21,6 +21,7 @@ interface TableBuritiTypeBDBase {
   parent: string|null;
   createdAt: number;
   updatedAt: number;
+  status: 'pending' | 'ready';
 };
 
 interface TableBuritiTypeBDFolder extends TableBuritiTypeBDBase {

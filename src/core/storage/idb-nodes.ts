@@ -1,306 +1,77 @@
 
 
-
-
-import type { ListItem, PropsClassAddNoteBD, PropsClassMainType, TableBuritiTypeBD } from "../types/general";
+import type { PropsClassAddNoteBD, PropsClassMainType, TableBuritiTypeBD } from "../types/general";
 import OPFSStorage from "./opfs-storage";
 
 export default class IDBNodes extends OPFSStorage {
 
-  constructor(props:PropsClassMainType){
+  constructor(props: PropsClassMainType) {
     super(props);
   }
 
-  protected async initExplorerData(){
-    await this.openDB();
-    await this.openStorage();
-  }
-
-  protected async getSource(props:{path:string}):Promise<TableBuritiTypeBD>{
+  protected async getSource(props: { path: string }): Promise<TableBuritiTypeBD> {
     const propsTrated = await this.pathTrated(props.path);
-    if(!propsTrated.table) throw new Error(`Path ${props.path} does not exist`);
+    if (!propsTrated.table) throw new Error(`Path ${props.path} does not exist`);
     return propsTrated.table;
   }
 
-  protected async addNode({path, type}:PropsClassAddNoteBD):Promise<void>{
+  protected async addNode({ path, type }: PropsClassAddNoteBD): Promise<void> {
 
-    if(type !== 'file' && type !== 'folder') throw new Error("Type must be 'file' or 'folder'");
-    if(path == '/') throw new Error("Should not create the root folder.");
+    if (type !== 'file' && type !== 'folder') throw new Error("Type must be 'file' or 'folder'");
+    if (path == '/') throw new Error("Should not create the root folder.");
 
     const propsTrated = await this.pathTrated(path);
-    if(propsTrated.path === '/') throw new Error("Cannot add root node");
-    if(propsTrated.table && propsTrated.table.type !== type) throw new Error(`Path "${path}" already exists as a "${propsTrated.table.type}"`);
+    if (propsTrated.path === '/') throw new Error("Cannot add root node");
+    if (propsTrated.table && propsTrated.table.type !== type) throw new Error(`Path "${path}" already exists as a "${propsTrated.table.type}"`);
 
     const now = Date.now();
-    
-    let contentId:string = String(crypto.getRandomValues(new Uint32Array(1))[0]);
-    if (propsTrated.table?.type === 'file') {
-      contentId = propsTrated.table.contentId ? propsTrated.table.contentId : contentId;
-    }
 
-    const responseAddNodeBase = {
-      path:propsTrated.path,
-      parent:propsTrated.parent,
-      createdAt: propsTrated.table ? propsTrated.table.createdAt : now,
+    const contentId = type === 'file'
+      ? String(crypto.getRandomValues(new Uint32Array(1))[0])
+      : undefined;
+
+    const node = {
+      path: propsTrated.path,
+      parent: propsTrated.parent,
+      type,
+      createdAt: propsTrated.table?.createdAt ?? now,
       updatedAt: now,
-    }
+      ...(contentId ? { contentId } : {})
+    } as TableBuritiTypeBD;
 
-    const responseAddNode:TableBuritiTypeBD = type === 'file' ?
-      {...responseAddNodeBase, type:'file', contentId} :
-      {...responseAddNodeBase, type:"folder"};
-
-    await this.transact("readwrite", (store) => store.put(responseAddNode));
+    await this.withWAL(node, async () => {
+      if (type === 'file') await this.writeStorage(contentId!, "");
+    });
   }
 
-  protected async removeNode({path}:{path:string}):Promise<void>{
+  protected async removeNode({ path }: { path: string }): Promise<void> {
+    if (path === '/') throw new Error('Cannot remove root node.');
+    const node = await this.getSource({ path });
 
-    if(path === '/') throw new Error('Cannot remove root node.');
-
-    const node = await this.getSource({path});
-
-    if (node.type === 'file'){
+    if (node.type === 'file') {
       await this.transact("readwrite", store => store.delete(node.path));
+      await this.deleteStorage(node.contentId).catch(() => {});
       return;
     }
 
-    if (node.type === 'folder'){
+    if (node.type === 'folder') {
+        // Busca todos os arquivos filhos para deletar do OPFS
+      const range = IDBKeyRange.bound(node.path + '/', node.path + '/' + '\uffff');
+      const children = await this.request<TableBuritiTypeBD[]>('readonly', store => store.getAll(range));
+
       await this.transact("readwrite", store => {
-        store.delete(IDBKeyRange.bound(node.path+'/', (node.path+'/') + "\uffff"));
+        store.delete(range);
         store.delete(node.path);
       });
+
+      for (const child of children) {
+        if (child.type === 'file') {
+          await this.deleteStorage(child.contentId).catch(() => {});
+        }
+      }
       return;
     }
 
     throw new Error(`Unknown node type "${(node as TableBuritiTypeBD).type}" at path "${path}".`);
-
   }
-
-  protected async copyNode({
-    fromPath,
-    toPath,
-    merge = false,
-    priority = 'source'
-  }: {
-    fromPath: string;
-    toPath: string;
-    merge?: boolean;
-    priority?: 'source' | 'destination';
-  }): Promise<void>{
-
-    if (fromPath === '/' || toPath === '/') throw new Error('Cannot copy root node.');
-
-    const fromEntity = await this.getSource({path: fromPath});
-    const toEntityProps = await this.pathTrated(toPath);
-
-    const now = Date.now();
-    const remap = (oldPath: string) => toEntityProps.path + oldPath.slice(fromEntity.path.length);
-    const remapParent = (oldParent: string | null): string | null =>
-      oldParent === null
-        ? null
-        : oldParent === fromEntity.path
-          ? toEntityProps.path
-          : remap(oldParent);
-
-    // ─── File ─────────────────────────────────────────────────
-
-    if (fromEntity.type === 'file') {
-      if (priority === 'destination' && !!toEntityProps.table) return;
-      if (!!toEntityProps.table) await this.removeNode({path: toEntityProps.path});
-      await this.transact('readwrite', (store) => {
-        store.put({...fromEntity, path: toEntityProps.path, parent: toEntityProps.parent, updatedAt: now});
-      });
-      return;
-    }
-
-    // ─── Folder ───────────────────────────────────────────────
-
-    if (fromEntity.type === 'folder') {
-
-      if (priority === 'destination') {
-        if (!merge && !!toEntityProps.table) return;
-        if (toEntityProps.table?.type === 'file') return;
-      }
-
-      if (!merge && !!toEntityProps.table) await this.removeNode({path: toEntityProps.path});
-      else if (toEntityProps.table?.type === 'file') await this.removeNode({path: toEntityProps.path});
-
-      await this.addNode({path: toEntityProps.path, type: 'folder'});
-
-      const range = IDBKeyRange.bound(fromEntity.path + '/', fromEntity.path + '/' + '\uffff');
-
-      await this.transact('readwrite', (store) => {
-        const req = store.openCursor(range);
-        req.onsuccess = (event) => {
-          const cursor = (event.target as IDBRequest<IDBCursorWithValue | null>).result;
-          if (!cursor) return;
-
-          const node = cursor.value as TableBuritiTypeBD;
-          const newPath = remap(node.path);
-          const newParent = remapParent(node.parent);
-
-          if (merge && priority === 'destination') {
-            const check = store.get(newPath);
-            check.onsuccess = () => {
-              if (!check.result) store.put({...node, path: newPath, parent: newParent, updatedAt: now});
-              cursor.continue();
-            };
-          } else {
-            store.put({...node, path: newPath, parent: newParent, updatedAt: now});
-            cursor.continue();
-          }
-        };
-      });
-    }
-  }
-
-  protected async moveNode({
-    fromPath,
-    toPath,
-    merge = false,
-    priority = 'source'
-  }: {
-    fromPath: string;
-    toPath: string;
-    merge?: boolean;
-    priority?: 'source' | 'destination';
-  }): Promise<void> {
-
-    if (fromPath === '/' || toPath === '/') throw new Error('Cannot move root node.');
-
-    const fromNorm = await this.pathTrated(fromPath);
-    const toNorm   = await this.pathTrated(toPath);
-
-    if (fromNorm.path === toNorm.path) throw new Error('Cannot move a node to itself.');
-    if (toNorm.path.startsWith(fromNorm.path + '/')) throw new Error('Cannot move a folder into one of its own descendants.');
-
-    await this.copyNode({ fromPath, toPath, merge, priority });
-    await this.removeNode({ path: fromNorm.path });
-  }
-
-  protected async existsNode({path}:{path:string}):Promise<boolean>{
-    const norm = await this.pathTrated(path);
-    return !!norm.table;
-  }
-
-  protected async sizeNode({
-    pathRef,
-    recursive = false,
-    filter
-  }: {
-    pathRef: string;
-    recursive?: boolean;
-    filter?: (item: ListItem) => boolean;
-  }): Promise<number> {
-
-    const norm = await this.pathTrated(pathRef);
-    if (!norm.table) throw new Error(`Path "${pathRef}" does not exist`);
-    if (norm.table.type !== 'folder') throw new Error(`Path "${pathRef}" is not a folder`);
-
-    return new Promise((resolve, reject) => {
-      let count = 0;
-      const transaction = this.db!.transaction('nodes', 'readonly');
-      const store = transaction.objectStore('nodes');
-
-      const recursiveRange = norm.path === '/'
-        ? IDBKeyRange.lowerBound('/', true)
-        : IDBKeyRange.bound(norm.path + '/', norm.path + '/' + '\uffff');
-
-      const req: IDBRequest<IDBCursorWithValue | null> = recursive
-        ? store.openCursor(recursiveRange)
-        : store.index('parent').openCursor(IDBKeyRange.only(norm.path));
-
-      req.onsuccess = (e) => {
-        const cursor = (e.target as IDBRequest<IDBCursorWithValue | null>).result;
-        if (!cursor) return;
-
-        const node = cursor.value as TableBuritiTypeBD;
-        const item: ListItem = {
-          path: node.path,
-          type: node.type,
-          createdAt: node.createdAt,
-          updatedAt: node.updatedAt,
-        };
-
-        if (!filter || filter(item)) count++;
-        cursor.continue();
-      };
-
-      transaction.oncomplete = () => resolve(count);
-      transaction.onerror = (e) => reject((e.target as IDBTransaction).error);
-    });
-  }
-
-  protected async listNodes({
-    pathRef,
-    recursive = false,
-    limit = -1,
-    page = 0,
-    filter
-  }: {
-    pathRef: string;
-    recursive?: boolean;
-    limit?: number;
-    page?: number;
-    filter?: (item: ListItem) => boolean;
-  }): Promise<ListItem[]> {
-
-    const norm = await this.pathTrated(pathRef);
-    if (!norm.table) throw new Error(`Path "${pathRef}" does not exist`);
-    if (norm.table.type !== 'folder') throw new Error(`Path "${pathRef}" is not a folder`);
-
-    return new Promise((resolve, reject) => {
-      const results: ListItem[] = [];
-      const transaction = this.db!.transaction('nodes', 'readonly');
-      const store = transaction.objectStore('nodes');
-
-      const recursiveRange = norm.path === '/'
-        ? IDBKeyRange.lowerBound('/', true)
-        : IDBKeyRange.bound(norm.path + '/', norm.path + '/' + '\uffff');
-
-      const req: IDBRequest<IDBCursorWithValue | null> = recursive
-        ? store.openCursor(recursiveRange)
-        : store.index('parent').openCursor(IDBKeyRange.only(norm.path));
-
-      let toSkip = limit === -1 ? 0 : page * limit;
-      let count = 0;
-
-      req.onsuccess = (e) => {
-        const cursor = (e.target as IDBRequest<IDBCursorWithValue | null>).result;
-        if (!cursor) return;
-
-        const node = cursor.value as TableBuritiTypeBD;
-        const item: ListItem = {
-          path: node.path,
-          type: node.type,
-          createdAt: node.createdAt,
-          updatedAt: node.updatedAt,
-        };
-
-        if (filter && !filter(item)) {
-          cursor.continue();
-          return;
-        }
-
-        if (toSkip > 0) {
-          toSkip--;
-          cursor.continue();
-          return;
-        }
-
-        if (limit !== -1 && count >= limit) return;
-
-        results.push(item);
-        count++;
-
-        if (limit !== -1 && count >= limit) return;
-        cursor.continue();
-      };
-
-      transaction.oncomplete = () => resolve(results);
-      transaction.onerror = (e) => reject((e.target as IDBTransaction).error);
-    });
-  }
-
 }
-
-

@@ -3,7 +3,7 @@ import IDBSetup from "./idb-setup";
 
 
 export default class OPFSStorage extends IDBSetup {
-  private root!: FileSystemDirectoryHandle;
+  protected root!: FileSystemDirectoryHandle;
 
   constructor(props: PropsClassMainType) {
     super(props);

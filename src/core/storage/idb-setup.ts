@@ -1,7 +1,7 @@
 
 
 import type { PropsClassMainType, TableBuritiTypeBD } from "../types/general";
-import validatePath from "../utils";
+import { validatePath } from "../utils";
 
 export default class IDBSetup {
 
@@ -66,6 +66,15 @@ export default class IDBSetup {
     return {path, parent, name:pathParts.pop() as string, table:existingNode};
   }
 
+  protected async withWAL(
+    data: TableBuritiTypeBD,
+    action: () => Promise<void>
+  ): Promise<void> {
+    await this.transact("readwrite", store => store.put({ ...data, status: 'pending' }));
+    await action();
+    await this.transact("readwrite", store => store.put({ ...data, status: 'ready' }));
+  }
+
   // ─── init ──────────────────────────────────────────────────
 
   protected openDB(): Promise<void> {
@@ -92,6 +101,7 @@ export default class IDBSetup {
         store.createIndex("type", "type");
         store.createIndex("parent", "parent");
         store.createIndex("contentId", "contentId", { unique:true });
+        store.createIndex("status", "status");
       };
     });
   }

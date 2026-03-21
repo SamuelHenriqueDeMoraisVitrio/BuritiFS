@@ -67,6 +67,12 @@ class MockDirectoryHandle {
     }
     this.files.delete(id);
   }
+
+  async *[Symbol.asyncIterator](): AsyncGenerator<[string, FileSystemHandle]> {
+    for (const [id] of this.files) {
+      yield [id, await this.getFileHandle(id)] as unknown as [string, FileSystemHandle];
+    }
+  }
 }
 
 export function setupOPFSMock(): void {
