@@ -88,9 +88,10 @@ export default class IDBSetup {
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
-        const store = db.createObjectStore("nodes", { keyPath: "path", autoIncrement: true });
+        const store = db.createObjectStore("nodes", { keyPath: "path" });
         store.createIndex("type", "type");
         store.createIndex("parent", "parent");
+        store.createIndex("contentId", "contentId", { unique:true });
       };
     });
   }

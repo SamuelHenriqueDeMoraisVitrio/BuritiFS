@@ -15,10 +15,13 @@ export default class OPFSStorage extends IDBSetup {
     return new OPFSStorage(props, root);
   }
 
-  async write(id: number, content: ArrayBuffer | string): Promise<void> {
+  async write(id: number, content: ArrayBuffer | string | object): Promise<void> {
     const fileHandle = await this.root.getFileHandle(String(id), { create: true });
     const writable = await fileHandle.createWritable();
-    await writable.write(content);
+    const data = typeof content === "object" && !(content instanceof ArrayBuffer)
+      ? JSON.stringify(content)
+      : content;
+    await writable.write(data);
     await writable.close();
   }
 
