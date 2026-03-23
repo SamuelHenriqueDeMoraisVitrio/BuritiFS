@@ -9,11 +9,10 @@ export default class IDBSetup {
 
   protected db: IDBDatabase | null = null;
   private dbName: string;
-  private dbVersion: number;
+  private static readonly DB_VERSION: number = 1;
 
-  constructor({name, ver}:PropsClassMainType){
+  constructor({name}:PropsClassMainType){
     this.dbName = name;
-    this.dbVersion = ver ?? 1;
   }
 
   // ─── Helpers ───────────────────────────────────────────────
@@ -79,7 +78,7 @@ export default class IDBSetup {
 
   protected openDB(): Promise<void> {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.dbName, this.dbVersion);
+      const request = indexedDB.open(this.dbName, IDBSetup.DB_VERSION);
 
       request.onsuccess = (event) => {
         this.db = (event.target as IDBOpenDBRequest).result;
@@ -97,11 +96,17 @@ export default class IDBSetup {
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
-        const store = db.createObjectStore("nodes", { keyPath: "path" });
-        store.createIndex("type", "type");
-        store.createIndex("parent", "parent");
-        store.createIndex("contentId", "contentId", { unique:true });
-        store.createIndex("status", "status");
+
+        if (event.oldVersion < 1){
+          const store = db.createObjectStore("nodes", { keyPath: "path" });
+          store.createIndex("type", "type");
+          store.createIndex("parent", "parent");
+          store.createIndex("contentId", "contentId", { unique:true });
+          store.createIndex("status", "status");
+        }
+
+        if (event.oldVersion < 2){}
+        if (event.oldVersion < 3){}
       };
     });
   }

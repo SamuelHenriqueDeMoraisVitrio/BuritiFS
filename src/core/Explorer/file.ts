@@ -35,8 +35,8 @@ export default class ExplorerFile {
     return {ok:true, error:null};
   }
 
-  async copy({to, merge, priority}:{to:string, merge?:boolean, priority?:'source'|'destination'}):Promise<ReturnedExplorerFileType>{
-    const result = await this.storage.copy({fromPath: this.base, toPath: to, merge, priority});
+  async copy({to, priority}:{to:string, priority?:'source'|'destination'}):Promise<ReturnedExplorerFileType>{
+    const result = await this.storage.copy({fromPath: this.base, toPath: to, merge:false, priority});
     if (!result.ok) return result;
     return await this.storage.source({path: to}) as ReturnedExplorerFileType;
   }
