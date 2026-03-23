@@ -105,8 +105,8 @@ export default class IDBSetup {
           store.createIndex("status", "status");
         }
 
-        if (event.oldVersion < 2){}
-        if (event.oldVersion < 3){}
+        //if (event.oldVersion < 2){}
+        //if (event.oldVersion < 3){}
       };
     });
   }
