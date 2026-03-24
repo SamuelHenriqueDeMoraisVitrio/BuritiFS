@@ -6,7 +6,7 @@
 ### Prioridades:
 
 #### Baixa:
-- [ ] validatePath deve ter um retorno;
+- [x] validatePath deve ter um retorno;
 - [x] Precisa checar event.oldVersion;
 - [ ] Talvez colocar OPFS de forma sincrona;
 

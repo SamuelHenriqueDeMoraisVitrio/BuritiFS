@@ -48,21 +48,19 @@ export default class IDBSetup {
     };
 
 
-    const pathObj = {path};
-    const err_validatePath = validatePath(pathObj);
-    if(err_validatePath) throw new Error(err_validatePath);
-    path = pathObj.path;
+    const {newPath, error} = validatePath(path);
+    if(error) throw new Error(error);
 
-    const pathParts = path.split('/');
+    const pathParts = newPath.split('/');
     const parent = pathParts.length === 2 ? '/' : pathParts.slice(0, -1).join('/');
 
     const parentNode = await this.request<TableBuritiTypeBD|null>('readonly', store => store.get(parent));
     if(!parentNode) throw new Error(`Parent path "${parent}" does not exist`);
     if(parentNode.type !== 'folder') throw new Error(`Parent path "${parent}" is not a folder`);
 
-    const existingNode = await this.request<TableBuritiTypeBD|null>('readonly', store => store.get(path));
+    const existingNode = await this.request<TableBuritiTypeBD|null>('readonly', store => store.get(newPath));
 
-    return {path, parent, name:pathParts.pop() as string, table:existingNode};
+    return {path:newPath, parent, name:pathParts.pop() as string, table:existingNode};
   }
 
   protected async withWAL(
