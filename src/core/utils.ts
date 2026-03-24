@@ -13,6 +13,19 @@ export function validatePath(obj: { path: string }): string | null {
   return null
 }
 
+export function validatePath2(oldPath: string):{newPath:string, error:string|null} {
+  // Sanitize
+  let path = oldPath;
+  if (!path.startsWith("/")) path = `/${path}`;
+  if (path.endsWith("/") && path !== '/') path = path.slice(0, -1);
+  // Validate
+  if (path.trim() === "") return { newPath: oldPath, error: 'Path cannot be empty' };
+  if (path.includes("//")) return { newPath: oldPath, error: 'Path cannot contain "//"' };
+  if (path.endsWith("/") && path !== "/") return { newPath: oldPath, error: 'Path cannot end with "/"' };
+  if (path.includes(' ')) return { newPath: oldPath, error: 'Path cannot contain spaces' };
+  return { newPath: path, error: null };
+}
+
 
 /*
 export async function runAction<S extends object, E extends object>(
