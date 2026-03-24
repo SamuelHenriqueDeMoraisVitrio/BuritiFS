@@ -3,9 +3,18 @@
   "version": "0.0.1",
   "description": "A file system tree manager for the browser using OPFS and IndexedDB",
   "exports": {
-    ".": "./dist/index.js",
-    "./react": "./dist/react/index.js"
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./react": {
+      "import": "./dist/react/index.js",
+      "require": "./dist/react/index.cjs"
+    }
   },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -33,7 +42,7 @@
   },
   "homepage": "https://github.com/SamuelHenriqueDeMoraisVitrio/BuritiFS#readme",
   "peerDependencies": {
-    "react": ">=17"
+    "react": ">=18"
   },
   "peerDependenciesMeta": {
     "react": {
