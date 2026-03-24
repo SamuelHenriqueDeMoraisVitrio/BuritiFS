@@ -15,7 +15,7 @@
 - [ ] O registry de IDB não previne múltiplas conexões;
 - [ ] Melhoria de transação do copyNode;
 - [x] O ExplorerFile em copy aceita merge, que não faz sentido;
-- [ ] recoverOrphans pode falhar silenciosamente em browsers sem suporte
+- [x] recoverOrphans pode falhar silenciosamente em browsers sem suporte
 - [ ] Finalizar build
 
 #### Alta:

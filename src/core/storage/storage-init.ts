@@ -35,6 +35,8 @@ export default class StorageInit extends IDBRefactor {
   }
 
   private async recoverOrphans(): Promise<void> {
+    if (!(Symbol.asyncIterator in this.root)) return;
+
     for await (const [name, handle] of this.root as unknown as AsyncIterable<[string, FileSystemHandle]>) {
       if (handle.kind !== 'file') continue;
       const linked = await this.request<TableBuritiTypeBD | null>(
