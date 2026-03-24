@@ -12,7 +12,7 @@
 
 #### Media:
 - [ ] Finalizar o index.db;
-- [ ] O registry de IDB não previne múltiplas conexões;
+- [x] O registry de IDB não previne múltiplas conexões;
 - [ ] Melhoria de transação do copyNode;
 - [x] O ExplorerFile em copy aceita merge, que não faz sentido;
 - [x] recoverOrphans pode falhar silenciosamente em browsers sem suporte

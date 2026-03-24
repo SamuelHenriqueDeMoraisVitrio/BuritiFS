@@ -75,6 +75,14 @@ export default class IDBSetup {
   // ─── init ──────────────────────────────────────────────────
 
   protected openDB(): Promise<void> {
+
+    // Se já existe uma conexão aberta para esse banco, reutiliza
+    const existing = IDBSetup.registry.get(this.dbName);
+    if (existing) {
+      this.db = existing;
+      return Promise.resolve();
+    }
+
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, IDBSetup.DB_VERSION);
 
