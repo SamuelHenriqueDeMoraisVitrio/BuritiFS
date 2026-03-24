@@ -166,18 +166,15 @@ export default class IDBRefactor extends IDBQuery {
       await this.transact('readwrite', store => {
         store.delete(fromNorm.path);
         store.put({ ...fromEntity, path: toNorm.path, parent: toNorm.parent, updatedAt: now });
-      });
 
-      for (const node of children) {
-        if (node.status === 'pending') continue;
-        const newPath = remap(node.path);
-        const newParent = remapParent(node.parent);
-
-        await this.transact('readwrite', store => {
+        for (const node of children) {
+          if (node.status === 'pending') continue;
+          const newPath = remap(node.path);
+          const newParent = remapParent(node.parent);
           store.delete(node.path);
           store.put({ ...node, path: newPath, parent: newParent, updatedAt: now });
-        });
-      }
+        }
+      });
     }
   }
 }
