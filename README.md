@@ -9,6 +9,7 @@
 - [x] validatePath deve ter um retorno;
 - [x] Precisa checar event.oldVersion;
 - [ ] Talvez colocar OPFS de forma sincrona;
+- [ ] No write ao modificar o updatedAt se o OPFS falhar ele não volta para o estado anterior;
 
 #### Media:
 - [ ] Finalizar o index.db;
