@@ -25,8 +25,8 @@ export default class IDBRefactor extends IDBQuery {
 
     const fromEntity = await this.getSource({ path: fromPath });
     const toEntityProps = await this.pathTrated(toPath);
-
     const now = Date.now();
+
     const remap = (oldPath: string) => toEntityProps.path + oldPath.slice(fromEntity.path.length);
     const remapParent = (oldParent: string | null): string | null =>
       oldParent === null
@@ -38,82 +38,115 @@ export default class IDBRefactor extends IDBQuery {
     // ─── File ─────────────────────────────────────────────────
     if (fromEntity.type === 'file') {
       if (priority === 'destination' && !!toEntityProps.table) return;
-      if (!!toEntityProps.table) await this.removeNode({ path: toEntityProps.path });
 
       const newContentId = String(crypto.getRandomValues(new Uint32Array(1))[0]);
       const content = await this.readStorage(fromEntity.contentId);
+      await this.writeStorage(newContentId, content);
 
-      await this.withWAL(
-        {
+      await this.transact('readwrite', store => {
+        if (toEntityProps.table) store.delete(toEntityProps.path);
+        store.put({
           path: toEntityProps.path,
           parent: toEntityProps.parent,
           type: 'file',
           contentId: newContentId,
           createdAt: fromEntity.createdAt,
           updatedAt: now,
-        } as TableBuritiTypeBD,
-        async () => await this.writeStorage(newContentId, content)
-      );
+          status: 'ready',
+        } as TableBuritiTypeBD);
+      });
+
+      // Cleanup OPFS do arquivo substituído (referência já removida do IDB)
+      if (toEntityProps.table?.type === 'file') {
+        await this.deleteStorage(toEntityProps.table.contentId).catch(() => {});
+      }
       return;
     }
 
     // ─── Folder ───────────────────────────────────────────────
     if (fromEntity.type === 'folder') {
-      const destIsFile = toEntityProps.table?.type === 'file';
       const destExists = !!toEntityProps.table;
+      const destIsFile = toEntityProps.table?.type === 'file';
 
-      if (priority === 'destination') {
-        if (!merge && destExists) return;
-        if (destIsFile) return;
-      }
+      if (priority === 'destination' && !merge && destExists) return;
+      if (priority === 'destination' && destIsFile) return;
 
-      if (destExists && (!merge || destIsFile)) {
-        await this.removeNode({ path: toEntityProps.path });
-      }
-
-      await this.addNode({ path: toEntityProps.path, type: 'folder' });
-
-      const range = IDBKeyRange.bound(fromEntity.path + '/', fromEntity.path + '/' + '\uffff');
       const skipExisting = merge && priority === 'destination';
+      const shouldReplaceDest = destExists && (!merge || destIsFile);
 
-      // Busca todos os filhos para poder duplicar arquivos no OPFS
-      const children = await this.request<TableBuritiTypeBD[]>('readonly', store => store.getAll(range));
+      // Coleta filhos da fonte
+      const sourceRange = IDBKeyRange.bound(fromEntity.path + '/', fromEntity.path + '/' + '\uffff');
+      const sourceChildren = await this.request<TableBuritiTypeBD[]>('readonly', store => store.getAll(sourceRange));
 
-      for (const node of children) {
+      // Coleta nós do destino que serão removidos (para cleanup do OPFS depois)
+      let destNodesToClean: TableBuritiTypeBD[] = [];
+      if (shouldReplaceDest) {
+        if (destIsFile && toEntityProps.table) {
+          destNodesToClean = [toEntityProps.table];
+        } else {
+          const destRange = IDBKeyRange.bound(toEntityProps.path + '/', toEntityProps.path + '/' + '\uffff');
+          destNodesToClean = await this.request<TableBuritiTypeBD[]>('readonly', store => store.getAll(destRange));
+        }
+      }
+
+      // Monta listas do que será criado
+      type FolderToCreate = { path: string; parent: string | null; createdAt: number };
+      type FileToCopy = { fromContentId: string; newContentId: string; newPath: string; newParent: string | null; createdAt: number };
+
+      const foldersToCreate: FolderToCreate[] = [
+        { path: toEntityProps.path, parent: toEntityProps.parent, createdAt: toEntityProps.table?.createdAt ?? now }
+      ];
+      const filesToCopy: FileToCopy[] = [];
+
+      for (const node of sourceChildren) {
         if (node.status === 'pending') continue;
         const newPath = remap(node.path);
         const newParent = remapParent(node.parent);
 
         if (node.type === 'folder') {
-          if (skipExisting) {
-            const exists = await this.existsNode({ path: newPath });
-            if (!exists) await this.addNode({ path: newPath, type: 'folder' });
-          } else {
-            await this.addNode({ path: newPath, type: 'folder' });
+          if (skipExisting && await this.existsNode({ path: newPath })) continue;
+          foldersToCreate.push({ path: newPath, parent: newParent, createdAt: node.createdAt });
+        } else if (node.type === 'file') {
+          if (skipExisting && await this.existsNode({ path: newPath })) continue;
+          filesToCopy.push({
+            fromContentId: node.contentId,
+            newContentId: String(crypto.getRandomValues(new Uint32Array(1))[0]),
+            newPath,
+            newParent,
+            createdAt: node.createdAt,
+          });
+        }
+      }
+
+      // Passo 1: escreve novos arquivos no OPFS (IDB intocado)
+      for (const file of filesToCopy) {
+        const content = await this.readStorage(file.fromContentId);
+        await this.writeStorage(file.newContentId, content);
+      }
+
+      // Passo 2: transact único para todas as mudanças no IDB
+      await this.transact('readwrite', store => {
+        if (shouldReplaceDest) {
+          store.delete(toEntityProps.path);
+          if (!destIsFile) {
+            const destRange = IDBKeyRange.bound(toEntityProps.path + '/', toEntityProps.path + '/' + '\uffff');
+            store.delete(destRange as unknown as IDBValidKey);
           }
-          continue;
         }
 
+        for (const folder of foldersToCreate) {
+          store.put({ path: folder.path, parent: folder.parent, type: 'folder', createdAt: folder.createdAt, updatedAt: now, status: 'ready' } as TableBuritiTypeBD);
+        }
+
+        for (const file of filesToCopy) {
+          store.put({ path: file.newPath, parent: file.newParent, type: 'file', contentId: file.newContentId, createdAt: file.createdAt, updatedAt: now, status: 'ready' } as TableBuritiTypeBD);
+        }
+      });
+
+      // Passo 3: cleanup OPFS antigo (referências já removidas do IDB)
+      for (const node of destNodesToClean) {
         if (node.type === 'file') {
-          if (skipExisting) {
-            const exists = await this.existsNode({ path: newPath });
-            if (exists) continue;
-          }
-
-          const newContentId = String(crypto.getRandomValues(new Uint32Array(1))[0]);
-          const content = await this.readStorage(node.contentId);
-
-          await this.withWAL(
-            {
-              path: newPath,
-              parent: newParent,
-              type: 'file',
-              contentId: newContentId,
-              createdAt: node.createdAt,
-              updatedAt: now,
-            } as TableBuritiTypeBD,
-            async () => await this.writeStorage(newContentId, content)
-          );
+          await this.deleteStorage(node.contentId).catch(() => {});
         }
       }
     }
