@@ -12,7 +12,7 @@
 - [ ] No write ao modificar o updatedAt se o OPFS falhar ele não volta para o estado anterior;
 
 #### Media:
-- [ ] Finalizar o index.db;
+- [x] Finalizar o index.db;
 - [x] O registry de IDB não previne múltiplas conexões;
 - [x] Melhoria de transação do copyNode;
 - [x] O ExplorerFile em copy aceita merge, que não faz sentido;
