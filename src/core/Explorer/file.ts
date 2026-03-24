@@ -1,7 +1,7 @@
 
 
 
-import type { ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerInfoType } from "../types/general";
+import type { ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerInfoType, ReturnedExplorerReadType } from "../types/general";
 import type ExplorerTree from "./ExplorerMain";
 
 export default class ExplorerFile {
@@ -56,5 +56,14 @@ export default class ExplorerFile {
   async exists():Promise<boolean>{
     return await this.storage.exists({path: this.base});
   }
+
+  async write({content}:{content: ArrayBuffer | string | object}):Promise<ReturnedErrorOrSucessExplorerType>{
+    return await this.storage.write({path: this.base, content});
+  }
+
+  async read():Promise<ReturnedExplorerReadType>{
+    return await this.storage.read({path: this.base});
+  }
+
 }
 

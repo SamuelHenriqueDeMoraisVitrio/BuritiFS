@@ -1,7 +1,7 @@
 
 
 import StorageInit from "../storage/storage-init";
-import type { ListItem, PropsClassMainType, ReturnedErrorExplorerType, ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType, ReturnedExplorerInfoType, ReturnedExplorerListType, ReturnedExplorerSizeType, TableBuritiTypeBD } from "../types/general";
+import type { ListItem, PropsClassMainType, ReturnedErrorExplorerType, ReturnedErrorOrSucessExplorerType, ReturnedExplorerFileType, ReturnedExplorerFolderType, ReturnedExplorerInfoType, ReturnedExplorerListType, ReturnedExplorerReadType, ReturnedExplorerSizeType, TableBuritiTypeBD } from "../types/general";
 import ExplorerFile from "./file";
 import ExplorerFolder from "./folder";
 
@@ -148,6 +148,30 @@ export default class ExplorerTree extends StorageInit {
     try {
       const size = await this.sizeNode({pathRef: path, recursive, filter});
       return {ok:true, error:null, size};
+    } catch (e) {
+      return {ok:false, error:e instanceof Error ? e.message : String(e)};
+    }
+  }
+
+  async write({path, content}:{path:string, content: ArrayBuffer | string | object}):Promise<ReturnedErrorOrSucessExplorerType>{
+    try {
+      const tableByDB = await this.getSource({path});
+      if (tableByDB.type === 'folder') return {ok: false, error: `Path "${path}" is a folder`};
+      await this.writeStorage(tableByDB.contentId, content);
+      await this.transact('readwrite', store => store.put({...tableByDB, updatedAt: Date.now()}));
+      return {ok:true, error:null};
+    } catch (e) {
+      return {ok:false, error:e instanceof Error ? e.message : String(e)};
+    }
+  }
+
+  async read({path}:{path:string}):Promise<ReturnedExplorerReadType>{
+    try {
+      const tableByDB = await this.getSource({path});
+      if (tableByDB.type === 'folder') return {ok:false, error:`Path "${path}" is a folder`};
+      const content = await this.readStorage(tableByDB.contentId);
+      const text = new TextDecoder().decode(content);
+      return {ok:true, error:null, content, text};
     } catch (e) {
       return {ok:false, error:e instanceof Error ? e.message : String(e)};
     }

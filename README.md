@@ -20,6 +20,6 @@
 
 #### Alta:
 - [x] moveNode de pasta não é atômico;
-- [ ] Criar o read e write;
+- [x] Criar o read e write;
 - [ ] Criar suporte para react;
 - [ ] Documentação;
