@@ -8,6 +8,7 @@
 #### Baixa:
 - [ ] validatePath deve ter um retorno;
 - [x] Precisa checar event.oldVersion;
+- [ ] Talvez colocar OPFS de forma sincrona;
 
 #### Media:
 - [ ] Finalizar o index.db;
