@@ -13,6 +13,7 @@ export default class ExplorerFolder {
   readonly type: 'folder' = 'folder';
 
   get path(): string { return this.base === '/' ? '/' : this.base.slice(0, -1); }
+  get tree(): ExplorerTree { return this.storage; }
 
   constructor(base:string, storage:ExplorerTree){
     this.base = base == '/' ? base : (base.endsWith('/') ? base : `${base}/`);
