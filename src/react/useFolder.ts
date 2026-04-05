@@ -7,7 +7,7 @@ export function useFolder(
   options?: { recursive?: boolean; filter?: (item: ListItem) => boolean }
 ): { items: ListItem[]; loading: boolean; error: string | null } {
   const [items, setItems] = useState<ListItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
