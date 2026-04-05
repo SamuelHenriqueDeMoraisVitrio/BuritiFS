@@ -8,8 +8,31 @@ import ExplorerFolder from "./folder";
 
 export default class ExplorerTree extends StorageInit {
 
+  private listeners: Map<string, Set<() => void>> = new Map();
+
   private constructor(props:PropsClassMainType){
     super(props);
+  }
+
+  subscribe(path: string, fn: () => void): () => void {
+    if (!this.listeners.has(path)) this.listeners.set(path, new Set());
+    this.listeners.get(path)!.add(fn);
+    return () => this.listeners.get(path)?.delete(fn);
+  }
+
+  private parentOf(path: string): string {
+    const idx = path.lastIndexOf('/');
+    if (idx <= 0) return '/';
+    return path.slice(0, idx);
+  }
+
+  private notify(path: string): void {
+    let current: string | null = path;
+    while (current !== null) {
+      this.listeners.get(current)?.forEach(fn => fn());
+      if (current === '/') break;
+      current = this.parentOf(current);
+    }
   }
 
   static async create(props:PropsClassMainType):Promise<ExplorerTree | ReturnedErrorExplorerType>{
@@ -71,6 +94,7 @@ export default class ExplorerTree extends StorageInit {
   async newFolder({path}:{path:string}):Promise<ReturnedExplorerFolderType>{
     try {
       await this.addNode({path, type:'folder'});
+      this.notify(this.parentOf(path));
       return new ExplorerFolder(path, this);
     } catch (e) {
       return {ok:false, error:e instanceof Error ? e.message : String(e)};
@@ -80,6 +104,7 @@ export default class ExplorerTree extends StorageInit {
   async newFile({path}:{path:string}):Promise<ReturnedExplorerFileType>{
     try {
       await this.addNode({path, type:'file'});
+      this.notify(this.parentOf(path));
       return new ExplorerFile(path, this);
     } catch (e) {
       return {ok:false, error:e instanceof Error ? e.message : String(e)};
@@ -90,7 +115,9 @@ export default class ExplorerTree extends StorageInit {
   
   async delete({path}:{path:string}):Promise<ReturnedErrorOrSucessExplorerType>{
     try {
+      const parent = this.parentOf(path);
       await this.removeNode({path});
+      this.notify(parent);
       return {ok:true, error:null};
     } catch (e) {
       return {ok:false, error:e instanceof Error ? e.message : String(e)};
@@ -100,6 +127,7 @@ export default class ExplorerTree extends StorageInit {
   async copy({fromPath, toPath, merge, priority}:{fromPath:string, toPath:string, merge?:boolean, priority?:'source'|'destination'}):Promise<ReturnedErrorOrSucessExplorerType>{
     try {
       await this.copyNode({fromPath, toPath, merge, priority});
+      this.notify(this.parentOf(toPath));
       return {ok:true, error:null};
     } catch (e) {
       return {ok:false, error:e instanceof Error ? e.message : String(e)};
@@ -109,6 +137,8 @@ export default class ExplorerTree extends StorageInit {
   async move({fromPath, toPath, force}:{fromPath:string, toPath:string, force?:boolean}):Promise<ReturnedErrorOrSucessExplorerType>{
     try {
       await this.moveNode({fromPath, toPath, force});
+      this.notify(this.parentOf(fromPath));
+      this.notify(this.parentOf(toPath));
       return {ok:true, error:null};
     } catch (e) {
       return {ok:false, error:e instanceof Error ? e.message : String(e)};
@@ -121,6 +151,7 @@ export default class ExplorerTree extends StorageInit {
       const parent = normalized.parent ?? '/';
       const toPath = `${parent === '/' ? '' : parent}/${name}`;
       await this.moveNode({fromPath: normalized.path, toPath});
+      this.notify(parent);
       return {ok:true, error:null};
     } catch (e) {
       return {ok:false, error:e instanceof Error ? e.message : String(e)};
@@ -159,6 +190,7 @@ export default class ExplorerTree extends StorageInit {
       if (tableByDB.type === 'folder') return {ok: false, error: `Path "${path}" is a folder`};
       await this.writeStorage(tableByDB.contentId, content);
       await this.transact('readwrite', store => store.put({...tableByDB, updatedAt: Date.now()}));
+      this.notify(path);
       return {ok:true, error:null};
     } catch (e) {
       return {ok:false, error:e instanceof Error ? e.message : String(e)};
