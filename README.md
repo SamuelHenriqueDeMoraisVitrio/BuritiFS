@@ -12,6 +12,7 @@
 - [ ] No write ao modificar o updatedAt se o OPFS falhar ele não volta para o estado anterior;
 - [ ] moveNode chama removeNode antes de mover quando force=true;
 - [ ] Herança profunda (7 níveis);
+- [ ] Usar o file em react como hook;
 
 #### Media:
 - [x] Finalizar o index.db;
