@@ -1,10 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useExplorer, useAction, type ExplorerFolder, type ListItem } from 'buritifs/react'
 import { useEditor } from './hooks/useEditor'
+import { useToast } from './hooks/useToast'
 import { Sidebar } from './components/Sidebar'
 import { Titlebar } from './components/Titlebar'
 import { Editor } from './components/Editor'
 import { ContextMenu } from './components/ContextMenu'
+import { Toast } from './components/Toast'
+import { seedFiles, resetFiles } from './initialFiles'
 
 interface ContextMenuState {
   x: number
@@ -21,8 +24,14 @@ function getNameFromPath(path: string): string {
 function App() {
   const explorer = useExplorer('buritifs-editor')
   const root = explorer.status === 'ready' ? explorer.root : null
-  const { openedFile, content, hasUnsavedChanges, openFile, updateContent, saveFile } = useEditor(root)
+  const { toast, showToast } = useToast()
+  const { openedFile, content, hasUnsavedChanges, openFile, updateContent, saveFile } = useEditor(root, showToast)
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
+
+  useEffect(() => {
+    if (!root) return
+    seedFiles(root)
+  }, [root])
 
   const newFileAction = useAction(async () => {
     if (!contextMenu) return { ok: true, error: null }
@@ -57,6 +66,17 @@ function App() {
     return item.delete()
   })
 
+  useEffect(() => { if (newFileAction.error) showToast(newFileAction.error) }, [newFileAction.error])
+  useEffect(() => { if (newFolderAction.error) showToast(newFolderAction.error) }, [newFolderAction.error])
+  useEffect(() => { if (renameAction.error) showToast(renameAction.error) }, [renameAction.error])
+  useEffect(() => { if (deleteAction.error) showToast(deleteAction.error) }, [deleteAction.error])
+
+  async function handleReset() {
+    if (!root) return
+    if (!window.confirm('Reset all files? This will delete everything and restore the initial files.')) return
+    await resetFiles(root)
+  }
+
   if (explorer.status === 'loading') {
     return (
       <div className="flex h-screen items-center justify-center bg-[#1e1e1e] text-[#6b6b6b] text-sm">
@@ -77,7 +97,9 @@ function App() {
     <div className="flex h-screen bg-[#1e1e1e] text-[#d4d4d4] font-mono text-sm overflow-hidden">
       <Sidebar
         root={explorer.root}
+        openedFilePath={openedFile?.path ?? null}
         onFileClick={openFile}
+        onReset={handleReset}
         onContextMenu={(e, target, targetParent, createIn) =>
           setContextMenu({ x: e.clientX, y: e.clientY, target, parentFolder: targetParent, createIn })
         }
@@ -107,6 +129,7 @@ function App() {
           onClose={() => setContextMenu(null)}
         />
       )}
+      <Toast message={toast.message} visible={toast.visible} />
     </div>
   )
 }

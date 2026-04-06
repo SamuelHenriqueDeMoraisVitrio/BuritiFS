@@ -13,14 +13,14 @@ const INITIAL_STATE: EditorState = {
   hasUnsavedChanges: false,
 }
 
-export function useEditor(root: ExplorerFolder | null) {
+export function useEditor(root: ExplorerFolder | null, onError?: (message: string) => void) {
   const [state, setState] = useState<EditorState>(INITIAL_STATE)
 
   const openFile = useCallback(async (file: ExplorerFile) => {
     const result = await file.read()
 
     if (!result.ok) {
-      console.error('Failed to read file:', result.error)
+      onError?.(result.error)
       return
     }
 
@@ -29,7 +29,7 @@ export function useEditor(root: ExplorerFolder | null) {
       content: result.text,
       hasUnsavedChanges: false,
     })
-  }, [])
+  }, [onError])
 
   const updateContent = useCallback((newContent: string) => {
     setState(prev => ({
@@ -46,12 +46,12 @@ export function useEditor(root: ExplorerFolder | null) {
     const result = await state.openedFile.write({ content: state.content })
 
     if (!result.ok) {
-      console.error('Failed to save file:', result.error)
+      onError?.(result.error)
       return
     }
 
     setState(prev => ({ ...prev, hasUnsavedChanges: false }))
-  }, [state.openedFile, state.content, state.hasUnsavedChanges])
+  }, [state.openedFile, state.content, state.hasUnsavedChanges, onError])
 
   // React to external changes on the opened file's parent directory.
   // The parent is notified on both delete and rename operations.
