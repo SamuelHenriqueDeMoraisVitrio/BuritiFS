@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react'
-import type { ExplorerFile } from 'buritifs'
+import { useState, useCallback, useEffect } from 'react'
+import type { ExplorerFile, ExplorerFolder } from 'buritifs'
 
 interface EditorState {
   openedFile: ExplorerFile | null
@@ -13,7 +13,7 @@ const INITIAL_STATE: EditorState = {
   hasUnsavedChanges: false,
 }
 
-export function useEditor() {
+export function useEditor(root: ExplorerFolder | null) {
   const [state, setState] = useState<EditorState>(INITIAL_STATE)
 
   const openFile = useCallback(async (file: ExplorerFile) => {
@@ -52,6 +52,33 @@ export function useEditor() {
 
     setState(prev => ({ ...prev, hasUnsavedChanges: false }))
   }, [state.openedFile, state.content, state.hasUnsavedChanges])
+
+  // React to external changes on the opened file's parent directory.
+  // The parent is notified on both delete and rename operations.
+  useEffect(() => {
+    if (!state.openedFile || !root) return
+
+    const file = state.openedFile
+    const parentPath = file.path.substring(0, file.path.lastIndexOf('/')) || '/'
+    const tree = root.tree
+
+    const unsubscribe = tree.subscribe(parentPath, async () => {
+      const exists = await file.exists()
+
+      if (!exists) {
+        // File was deleted or renamed externally — close the editor
+        setState(INITIAL_STATE)
+        return
+      }
+
+      // File still exists. If it was renamed via this same ExplorerFile instance,
+      // file.path already reflects the new name. Trigger a re-render so the
+      // Titlebar picks up the updated filename.
+      setState(prev => ({ ...prev }))
+    })
+
+    return unsubscribe
+  }, [state.openedFile, root])
 
   return {
     openedFile: state.openedFile,

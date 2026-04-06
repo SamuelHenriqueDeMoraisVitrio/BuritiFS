@@ -20,7 +20,8 @@ function getNameFromPath(path: string): string {
 
 function App() {
   const explorer = useExplorer('buritifs-editor')
-  const { openedFile, content, hasUnsavedChanges, openFile, updateContent, saveFile } = useEditor()
+  const root = explorer.status === 'ready' ? explorer.root : null
+  const { openedFile, content, hasUnsavedChanges, openFile, updateContent, saveFile } = useEditor(root)
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
 
   const newFileAction = useAction(async () => {
@@ -85,6 +86,7 @@ function App() {
         <Titlebar
           filename={openedFile ? getNameFromPath(openedFile.path) : null}
           hasUnsavedChanges={hasUnsavedChanges}
+          onSave={saveFile}
         />
         <Editor
           content={content}
