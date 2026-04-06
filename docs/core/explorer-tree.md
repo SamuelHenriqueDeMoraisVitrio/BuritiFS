@@ -591,18 +591,18 @@ function watchDocs(tree) {
 Closes the IndexedDB connection and removes it from the internal registry. Call this when the filesystem is no longer needed (e.g., on component unmount or page unload).
 
 ```typescript
-close(): void
+static close(props: { name: string }): void
 ```
 
 **Example:**
 
 ```typescript
 window.addEventListener('beforeunload', () => {
-  tree.close();
+  ExplorerTree.close({ name: 'my-app' });
 });
 ```
 
-> The React `useExplorer` hook calls `close()` automatically on unmount. You only need to call this manually in vanilla/framework code.
+> The React `useExplorer` hook calls `ExplorerTree.close({ name })` automatically on unmount. You only need to call this manually in vanilla/framework code.
 
 ---
 

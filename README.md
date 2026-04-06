@@ -22,7 +22,7 @@ BuritiFS solves all of this:
 - **Automatic crash recovery** — on every initialization, three recovery phases clean up any state left by interrupted operations.
 - **Reactive subscriptions** — `subscribe(path, fn)` fires whenever anything under that path changes, bubbling up to the root automatically.
 
-> The name *Buriti* comes from a palm tree native to the Brazilian Cerrado (Centro-Oeste region). FS stands for File System.
+> The name *Buriti* comes from a Brazilian palm tree. FS stands for File System.
 
 ---
 
@@ -73,15 +73,15 @@ BuritiFS is a good fit for:
 import { ExplorerTree } from 'buritifs';
 
 const result = await ExplorerTree.create({ name: 'my-app' });
+
 if (!result.ok) {
   console.error('Failed to open filesystem:', result.error);
-  process.exit(1);
+  return;
 }
 
 // result is an ExplorerFolder pointing to "/"
 const root = result;
 
-// Create a folder and a file
 const docs = await root.newFolder({ name: 'docs' });
 if (!docs.ok) throw new Error(docs.error);
 
@@ -95,12 +95,10 @@ if (read.ok) {
   console.log(read.text); // "Hello, BuritiFS!"
 }
 
-// Subscribe to changes at the root level
 const unsubscribe = root.tree.subscribe('/', () => {
   console.log('Something changed in the filesystem');
 });
 
-// Cleanup
 unsubscribe();
 root.tree.close();
 ```
