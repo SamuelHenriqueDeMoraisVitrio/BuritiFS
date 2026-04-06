@@ -22,7 +22,7 @@ export function useExplorer(name: string): UseExplorerState {
       }
 
       if (!(result instanceof ExplorerTree)) {
-        setState({ status: 'error', error: result.error });
+        setState({ status: 'error', error: result.error ?? 'Unknown error' });
         return;
       }
 
@@ -34,7 +34,7 @@ export function useExplorer(name: string): UseExplorerState {
       }
 
       if (!(rootResult instanceof ExplorerFolder)) {
-        setState({ status: 'error', error: rootResult.error });
+        setState({ status: 'error', error: rootResult.error ?? 'Unknown error' });
         return;
       }
 
