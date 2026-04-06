@@ -78,14 +78,13 @@ class MockDirectoryHandle {
 export function setupOPFSMock(): void {
   const root = new MockDirectoryHandle();
 
-  Object.defineProperty(globalThis, 'navigator', {
-    value: {
-      ...((globalThis as typeof globalThis & { navigator?: object }).navigator ?? {}),
-      storage: {
-        getDirectory: async () => root,
-      },
-    },
-    writable: true,
-    configurable: true,
-  });
+  Object.defineProperty(
+    typeof navigator !== 'undefined' ? navigator : globalThis,
+    'storage',
+    {
+      value: { getDirectory: async () => root },
+      writable: true,
+      configurable: true,
+    }
+  );
 }
