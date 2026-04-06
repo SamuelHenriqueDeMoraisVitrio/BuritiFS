@@ -33,6 +33,7 @@ interface SubFolderItemProps {
 
 function SubFolderItem({ parentFolder, item, onFileClick, onContextMenu, depth }: SubFolderItemProps) {
   const [subFolder, setSubFolder] = useState<ExplorerFolder | null>(null)
+  const [expanded, setExpanded] = useState(false)
   const name = getNameFromPath(item.path)
   const paddingLeft = `${(depth + 1) * 12}px`
 
@@ -49,16 +50,22 @@ function SubFolderItem({ parentFolder, item, onFileClick, onContextMenu, depth }
       <div
         className="flex items-center gap-1 py-0.5 px-2 hover:bg-[#2a2d2e] cursor-pointer text-[#cccccc]"
         style={{ paddingLeft }}
+        onClick={() => setExpanded(prev => !prev)}
         onContextMenu={e => {
           e.preventDefault()
           e.stopPropagation()
           if (subFolder) onContextMenu(e, item, parentFolder, subFolder)
         }}
       >
-        <span className="text-xs">▶</span>
+        <span
+          className="text-xs transition-transform duration-100"
+          style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
+        >
+          ▶
+        </span>
         <span>{name}</span>
       </div>
-      {subFolder && (
+      {expanded && subFolder && (
         <FolderNode
           folder={subFolder}
           onFileClick={onFileClick}
