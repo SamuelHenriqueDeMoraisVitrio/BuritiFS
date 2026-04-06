@@ -1,6 +1,6 @@
 {
   "name": "buritifs",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A file system tree manager for the browser using OPFS and IndexedDB",
   "exports": {
     ".": {

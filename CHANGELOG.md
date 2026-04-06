@@ -1,3 +1,20 @@
+# [1.1.0](https://github.com/SamuelHenriqueDeMoraisVitrio/BuritiFS/compare/v1.0.0...v1.1.0) (2026-04-06)
+
+
+### Bug Fixes
+
+* **ci:** downgrade actions/checkout from v6 to v4 ([a842c36](https://github.com/SamuelHenriqueDeMoraisVitrio/BuritiFS/commit/a842c367b61cd26b6855691d9968e1103c803b29))
+
+
+### Features
+
+* **editor:** add toast notifications, active file highlight, and reset ([7a34f1c](https://github.com/SamuelHenriqueDeMoraisVitrio/BuritiFS/commit/7a34f1c19f69a48d8bb3acb68362946004c22f3c))
+* **editor:** prevent duplicate file/folder creation with existence check ([c9ed819](https://github.com/SamuelHenriqueDeMoraisVitrio/BuritiFS/commit/c9ed819e0e73328ed4125e89fafd12feeba2af4c))
+* **examples/editor:** add context menu for file explorer actions ([2b42c36](https://github.com/SamuelHenriqueDeMoraisVitrio/BuritiFS/commit/2b42c36534c4b787aa3e63d4f96b34ab491dd970))
+* **examples/editor:** add Tailwind CSS v4 support ([2453683](https://github.com/SamuelHenriqueDeMoraisVitrio/BuritiFS/commit/2453683862ea00a3113c5009b7e14952f0ee4514))
+* **examples/editor:** implement file explorer and editor UI ([4371f5e](https://github.com/SamuelHenriqueDeMoraisVitrio/BuritiFS/commit/4371f5e52aa968ee2b83999cdd2b942c7d0c6bf5))
+* **examples/editor:** sync editor state with external file system changes ([60e9ee8](https://github.com/SamuelHenriqueDeMoraisVitrio/BuritiFS/commit/60e9ee85a9b1fb0cdfc074e71b2fee0c29af04d8))
+
 # 1.0.0 (2026-04-06)
 
 
