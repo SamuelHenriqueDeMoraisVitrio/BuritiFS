@@ -135,32 +135,59 @@ Before running `npm publish`, go through this checklist:
 
 ## Publishing to npm
 
-The `prepublishOnly` script in `package.json` automatically runs the build and tests before publishing:
+BuritiFS uses **semantic-release** to automate versioning, changelog generation, and publishing. Every push to `main` triggers the release pipeline automatically via GitHub Actions.
 
-```json
-{
-  "scripts": {
-    "prepublishOnly": "npm run build && npm test"
-  }
-}
+### How it works
+
+Semantic-release analyzes commit messages since the last release and determines the next version automatically:
+
+| Commit prefix | Example | Version bump |
+|---|---|---|
+| `fix:` | `fix(core): correct path normalization` | Patch (0.0.1 → 0.0.2) |
+| `feat:` | `feat(react): add useFile hook` | Minor (0.0.1 → 0.1.0) |
+| `feat!:` or `BREAKING CHANGE:` | `feat!: rename ExplorerTree.create` | Major (0.0.1 → 1.0.0) |
+
+### What happens on each push to main
+
+1. GitHub Actions runs the full test suite.
+2. Runs the build.
+3. Semantic-release analyzes commits since the last release.
+4. If there are releasable commits: bumps `package.json` version, generates `CHANGELOG.md`, publishes to npm, creates a GitHub Release.
+5. If there are no releasable commits (e.g., only `chore:` or `docs:` commits): nothing is published.
+
+### Required secrets
+
+| Secret | Where to get it |
+|---|---|
+| `NPMJS_TOKEN` | npmjs.com → Access Tokens → Granular Access Token with publish permission |
+| `GITHUB_TOKEN` | Provided automatically by GitHub Actions — no setup needed |
+
+### Triggering a release manually
+
+Just push to `main` with the right commit message. No manual tagging or `npm publish` needed:
+```bash
+git commit -m "feat: add useFile hook"
+git push origin main
+# GitHub Actions handles the rest
 ```
 
-To publish:
+### Commit message convention
 
-```bash
-npm publish
+Follow the [Conventional Commits](https://www.conventionalcommits.org/) spec:
 ```
+<type>(<scope>): <description>
 
-To publish a pre-release (e.g., beta):
+Types that trigger a release:
+  fix      → patch release
+  feat     → minor release
+  feat!    → major release (breaking change)
 
-```bash
-npm publish --tag beta
-```
-
-Consumers can install a beta with:
-
-```bash
-npm install buritifs@beta
+Types that do NOT trigger a release:
+  chore    → maintenance
+  docs     → documentation only
+  test     → tests only
+  refactor → no behavior change
+  style    → formatting
 ```
 
 ---
