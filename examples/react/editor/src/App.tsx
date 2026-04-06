@@ -37,6 +37,11 @@ function App() {
     if (!contextMenu) return { ok: true, error: null }
     const name = window.prompt('File name:')
     if (!name) return { ok: true, error: null }
+    const existing = await contextMenu.createIn.get({ name })
+    if (existing.ok) {
+      window.alert(`"${name}" already exists.`)
+      return { ok: true, error: null }
+    }
     return contextMenu.createIn.newFile({ name })
   })
 
@@ -44,6 +49,11 @@ function App() {
     if (!contextMenu) return { ok: true, error: null }
     const name = window.prompt('Folder name:')
     if (!name) return { ok: true, error: null }
+    const existing = await contextMenu.createIn.get({ name })
+    if (existing.ok) {
+      window.alert(`"${name}" already exists.`)
+      return { ok: true, error: null }
+    }
     return contextMenu.createIn.newFolder({ name })
   })
 
