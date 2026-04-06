@@ -11,7 +11,6 @@
 - [ ] Herança profunda (7 níveis);
 - [ ] Usar o file em react como hook;
 - [ ] Finalizar build;
-- [ ] Arrow function é recriada em todo render;
 - [ ] Documentação;
 - [ ] Testes React;
 - [ ] Apresentação em TS|HTML|CSS e JSX;
@@ -28,4 +27,5 @@
 - [x] moveNode de pasta não é atômico;
 - [x] Criar o read e write;
 - [x] Criar suporte para react;
+- [x] Arrow function é recriada em todo render;
 

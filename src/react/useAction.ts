@@ -11,6 +11,11 @@ export function useAction<T>(
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const mounted = useRef(false);
+  const fnRef = useRef(fn);
+
+  useEffect(() => {
+    fnRef.current = fn;
+  }, [fn]);
 
   useEffect(() => {
     mounted.current = true;
@@ -26,7 +31,7 @@ export function useAction<T>(
       setError(null);
     }
     try {
-      const result = await fn();
+      const result = await fnRef.current();
       if (!result.ok) {
         if (mounted.current) setError(result.error);
       }
@@ -35,7 +40,7 @@ export function useAction<T>(
     } finally {
       if (mounted.current) setLoading(false);
     }
-  }, [fn, loading]);
+  }, [loading]);
 
   const reset = useCallback(() => {
     if (mounted.current) {
