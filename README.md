@@ -1,10 +1,5 @@
 <div align="center">
-  <table border="0" cellspacing="0" cellpadding="0">
-    <tr>
-      <td><img src="public/LogoSemFundo.png" alt="BuritiFS" width="80" /></td>
-      <td><h1>&nbsp;BuritiFS</h1></td>
-    </tr>
-  </table>
+  <img src="public/LogoSemFundo.png" alt="BuritiFS" width="220" />
 </div>
 
 <div align="center">
