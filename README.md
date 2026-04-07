@@ -1,10 +1,16 @@
-# BuritiFS
+<div align="center">
+  <img src="public/LogoSemFundo.png" alt="BuritiFS" width="220" />
+</div>
+
+<div align="center">
 
 [![npm version](https://img.shields.io/npm/v/buritifs.svg)](https://www.npmjs.com/package/buritifs)
 [![TypeScript](https://img.shields.io/badge/TypeScript-ready-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 **A real filesystem API for the browser — paths, copy/move/rename, and crash recovery, all in one library.**
+
+</div>
 
 ---
 
