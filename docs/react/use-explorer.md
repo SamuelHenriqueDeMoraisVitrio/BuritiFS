@@ -107,7 +107,7 @@ export function App() {
 
 2. **During lifetime** — the underlying `ExplorerTree` connection stays open. All hooks and direct tree calls share this single connection.
 
-3. **Unmount** — `useExplorer` calls `root.tree.close()`, removing the database from the internal registry. If you remount the same name, a fresh connection is established.
+3. **Unmount** — `useExplorer` calls `ExplorerTree.close({ name })`, removing the database from the internal registry. If you remount the same name, a fresh connection is established.
 
 ---
 

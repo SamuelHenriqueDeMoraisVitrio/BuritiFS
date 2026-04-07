@@ -13,10 +13,10 @@ You never instantiate `ExplorerTree` directly — use the static `create()` meth
 Opens (or initializes) a named filesystem. Each unique `name` maps to a separate IndexedDB database, so you can have multiple independent filesystems on the same origin.
 
 ```typescript
-static async create(props: { name: string }): Promise<ExplorerFolder | { ok: false; error: string }>
+static async create(props: { name: string }): Promise<ExplorerTree | { ok: false; error: string }>
 ```
 
-On success, returns an `ExplorerFolder` for the root path `"/"`. The folder exposes `.tree` to access the underlying `ExplorerTree` instance.
+On success, returns the `ExplorerTree` instance. Call `.source({ path: '/' })` on it to get an `ExplorerFolder` pointing to the root.
 
 On failure, returns `{ ok: false, error: string }`.
 
@@ -25,27 +25,50 @@ On failure, returns `{ ok: false, error: string }`.
 ```typescript
 import { ExplorerTree } from 'buritifs';
 
-const result = await ExplorerTree.create({ name: 'my-app' });
+const tree = await ExplorerTree.create({ name: 'my-app' });
 
-if (!result.ok) {
-  console.error('Failed to open filesystem:', result.error);
+if (!(tree instanceof ExplorerTree)) {
+  console.error('Failed to open filesystem:', tree.error);
   return;
 }
 
-// result is an ExplorerFolder at "/"
-const root = result;
+// Get the root folder
+const rootResult = await tree.source({ path: '/' });
+if (!rootResult.ok) throw new Error(rootResult.error);
+
+const root = rootResult; // ExplorerFolder at "/"
 console.log(root.path);   // "/"
 console.log(root.type);   // "folder"
 console.log(root.ok);     // true
 console.log(root.error);  // null
 
-// Access the ExplorerTree instance
-const tree = root.tree;
+// Access the ExplorerTree instance from the folder
+const treeRef = root.tree;
 ```
 
 **Error cases:**
 - Browser does not support OPFS or IndexedDB.
 - Database version mismatch (unlikely in production but can happen during development).
+
+---
+
+### `ExplorerTree.close(props)`
+
+Closes the IndexedDB connection and removes it from the internal registry. Call this when the filesystem is no longer needed (e.g., on component unmount or page unload).
+
+```typescript
+static close(props: { name: string }): void
+```
+
+**Example:**
+
+```typescript
+window.addEventListener('beforeunload', () => {
+  ExplorerTree.close({ name: 'my-app' });
+});
+```
+
+> The React `useExplorer` hook calls `ExplorerTree.close({ name })` automatically on unmount. You only need to call this manually in vanilla/framework code.
 
 ---
 
@@ -586,31 +609,12 @@ function watchDocs(tree) {
 
 ---
 
-### `close()`
-
-Closes the IndexedDB connection and removes it from the internal registry. Call this when the filesystem is no longer needed (e.g., on component unmount or page unload).
-
-```typescript
-static close(props: { name: string }): void
-```
-
-**Example:**
-
-```typescript
-window.addEventListener('beforeunload', () => {
-  ExplorerTree.close({ name: 'my-app' });
-});
-```
-
-> The React `useExplorer` hook calls `ExplorerTree.close({ name })` automatically on unmount. You only need to call this manually in vanilla/framework code.
-
----
-
 ## Summary Table
 
 | Method | Returns | Throws |
 |---|---|---|
-| `ExplorerTree.create(props)` | `ExplorerFolder \| { ok: false }` | Never |
+| `ExplorerTree.create(props)` | `ExplorerTree \| { ok: false }` | Never |
+| `ExplorerTree.close({ name })` | `void` | Never |
 | `source({ path })` | `ExplorerFolder \| ExplorerFile \| { ok: false }` | Never |
 | `info({ path })` | `{ ok, path, createdAt, updatedAt }` | Never |
 | `type({ path })` | `'file' \| 'folder' \| null` | Never |
@@ -626,7 +630,6 @@ window.addEventListener('beforeunload', () => {
 | `write({ path, content })` | `{ ok: true } \| { ok: false }` | Never |
 | `read({ path })` | `{ ok, content, text }` | Never |
 | `subscribe(path, fn)` | `() => void` (unsubscribe) | Never |
-| `close()` | `void` | Never |
 
 ---
 

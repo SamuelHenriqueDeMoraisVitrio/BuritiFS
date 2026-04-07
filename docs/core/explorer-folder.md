@@ -195,10 +195,8 @@ if (!result.ok) {
   return;
 }
 
-// folder.path is now stale — the node lives at "/projects/final"
+// folder.path is now "/projects/final" — the instance updates itself after rename
 ```
-
-> After a successful rename, this `ExplorerFolder` instance's `path` property still reflects the old path. Re-fetch with `source()` if you need the updated path.
 
 **Error cases:**
 - A node with the new name already exists in the parent.

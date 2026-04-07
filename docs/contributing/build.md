@@ -100,39 +100,6 @@ If you add any module-level side effects (global registrations, polyfills, etc.)
 
 ---
 
-## Pre-publish Checklist
-
-Before running `npm publish`, go through this checklist:
-
-```
-[ ] Run the full test suite: npm test
-    All tests must pass.
-
-[ ] Run the build: npm run build
-    Check that dist/ contains:
-      - index.js, index.cjs, index.d.ts (core)
-      - react/index.js, react/index.cjs, react/index.d.ts (hooks)
-
-[ ] Verify exports work correctly:
-    node -e "const b = require('./dist/index.cjs'); console.log(typeof b.ExplorerTree)"
-    # Should print "function"
-
-[ ] Bump the version in package.json following semver:
-    - Patch (0.0.x): bug fixes, no API changes
-    - Minor (0.x.0): new features, backwards-compatible
-    - Major (x.0.0): breaking API changes
-
-[ ] Update the CHANGELOG or release notes.
-
-[ ] Commit and tag the release:
-    git add .
-    git commit -m "chore: release vX.Y.Z"
-    git tag vX.Y.Z
-    git push && git push --tags
-```
-
----
-
 ## Publishing to npm
 
 BuritiFS uses **semantic-release** to automate versioning, changelog generation, and publishing. Every push to `main` triggers the release pipeline automatically via GitHub Actions.

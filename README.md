@@ -65,6 +65,12 @@ BuritiFS is a good fit for:
 
 ---
 
+## Try it Live
+
+An interactive example is available at **[samuelhenriquedemoraisvitrio.github.io/BuritiFS](https://samuelhenriquedemoraisvitrio.github.io/BuritiFS/)** — a browser-based code editor backed entirely by BuritiFS, with a file explorer, tab management, and persistent storage. No server required.
+
+---
+
 ## Quick Demo
 
 ### Vanilla TypeScript (no framework)
@@ -72,15 +78,17 @@ BuritiFS is a good fit for:
 ```typescript
 import { ExplorerTree } from 'buritifs';
 
-const result = await ExplorerTree.create({ name: 'my-app' });
+const tree = await ExplorerTree.create({ name: 'my-app' });
 
-if (!result.ok) {
-  console.error('Failed to open filesystem:', result.error);
+if (!(tree instanceof ExplorerTree)) {
+  console.error('Failed to open filesystem:', tree.error);
   return;
 }
 
-// result is an ExplorerFolder pointing to "/"
-const root = result;
+// Get the root ExplorerFolder at "/"
+const rootResult = await tree.source({ path: '/' });
+if (!rootResult.ok) throw new Error(rootResult.error);
+const root = rootResult;
 
 const docs = await root.newFolder({ name: 'docs' });
 if (!docs.ok) throw new Error(docs.error);
@@ -100,7 +108,7 @@ const unsubscribe = root.tree.subscribe('/', () => {
 });
 
 unsubscribe();
-root.tree.close();
+ExplorerTree.close({ name: 'my-app' });
 ```
 
 ### React
@@ -191,6 +199,8 @@ import { useExplorer, useFolder, useAction } from 'buritifs/react';
 - [x] 3-phase crash recovery on initialization
 - [x] Reactive subscribe system (bubbles to root)
 - [x] React hooks: useExplorer, useFolder, useAction
+- [x] Interactive browser example (code editor on GitHub Pages)
+- [x] CI/CD with semantic-release (automated versioning and npm publish)
 - [ ] `useFile` — reactive hook for file content, auto-updating when the file is written
 - [ ] Synchronous OPFS access via Web Worker for high-performance I/O
 - [ ] GitHub sync — push/pull filesystem snapshots to a GitHub repository

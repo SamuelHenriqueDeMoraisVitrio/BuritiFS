@@ -119,7 +119,7 @@ function WorkArea({ root }) {
 | Component mounting `useExplorer` | Opens IDB connection, runs 3-phase recovery, resolves to `root` |
 | Component mounting `useFolder` | Calls `list()` once, sets up `subscribe()` internally |
 | Mutation runs via `useAction` | Mutation completes, event fires, `useFolder` re-renders |
-| Component unmounting `useExplorer` | Calls `tree.close()`, removes IDB from registry |
+| Component unmounting `useExplorer` | Calls `ExplorerTree.close({ name })`, removes IDB from registry |
 | Component unmounting `useFolder` | Calls unsubscribe function, no memory leak |
 
 ---

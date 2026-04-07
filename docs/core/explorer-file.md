@@ -92,10 +92,8 @@ if (!result.ok) {
 }
 
 // The file now lives at "/docs/final.txt"
-// Note: file.path still shows the old path — re-fetch if you need the updated reference
+// file.path is now "/docs/final.txt" — the instance updates itself after rename
 ```
-
-> After a successful rename, this `ExplorerFile` instance's `path` property still reflects the old path. Use `tree.source({ path: newPath })` if you need an up-to-date reference.
 
 **Error cases:**
 - A file with the new name already exists in the same parent folder.

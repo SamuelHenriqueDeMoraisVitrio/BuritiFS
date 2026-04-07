@@ -40,12 +40,17 @@ This document describes what BuritiFS has implemented today and what is planned 
 - **`useFolder(folder, options?)`** — reactive directory listing.
 - **`useAction(fn)`** — mutation wrapper with loading/error/reset state.
 
+### Interactive example
+
+A full browser-based code editor backed by BuritiFS is live at [samuelhenriquedemoraisvitrio.github.io/BuritiFS](https://samuelhenriquedemoraisvitrio.github.io/BuritiFS/). It demonstrates the React hooks, file explorer, tab management, and persistent OPFS/IDB storage with no backend.
+
 ### Build and packaging
 
 - Dual ESM/CJS output via `tsup`.
 - Two entry points: `buritifs` (core) and `buritifs/react` (hooks).
 - Full TypeScript declarations (`.d.ts`).
 - Source maps.
+- Automated releases via **semantic-release** — every push to `main` with a releasable commit automatically bumps the version, generates `CHANGELOG.md`, publishes to npm, and creates a GitHub Release.
 
 ---
 
