@@ -1,5 +1,6 @@
 <div align="center">
-  <img src="public/LogoSemFundo.png" alt="BuritiFS" width="220" />
+  <img src="public/LogoSemFundo.png" alt="BuritiFS" width="60" style="vertical-align:middle;" />
+  <span style="font-size:2.5rem; font-weight:bold; vertical-align:middle; margin-left:12px;">BuritiFS</span>
 </div>
 
 <div align="center">
