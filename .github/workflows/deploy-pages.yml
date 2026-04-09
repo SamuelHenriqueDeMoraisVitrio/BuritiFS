@@ -28,6 +28,9 @@ jobs:
         working-directory: examples/react/editor
         run: npm ci
 
+      - name: Copy public assets
+        run: cp public/LogoMin.png examples/react/editor/public/LogoMin.png
+
       - name: Build
         working-directory: examples/react/editor
         run: npm run build
