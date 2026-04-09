@@ -1,7 +1,7 @@
 # BuritiFS
 
 <div align="center">
-  <img src="public/LogoSemFundo.png" alt="BuritiFS" width="220" />
+  <img src="public/logo.svg" alt="BuritiFS" width="220" />
 </div>
 
 <div align="center">
