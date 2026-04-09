@@ -7,11 +7,10 @@
    width="2505.3801"
    height="4096.8804"
    viewBox="0 0 2505.3801 4096.8804"
-   sodipodi:docname="Logos.png"
+   sodipodi:docname="Model.png"
    inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
    inkscape:export-batch-name="Logo"
    inkscape:export-batch-path="inkscape/logo/reverse"
-   inkscape:dataloss="true"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -71,6 +70,44 @@
          id="path48320"
          style="fill-opacity:1;stroke-width:0.395584" />
     </pattern>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath51">
+      <path
+         id="path51"
+         style="stroke-width:0.0999999;stroke-linecap:square;paint-order:markers fill stroke;stop-color:#000000"
+         d="m 1806.4991,-753.5228 h 1637.2646 v 66.90533 H 1806.4991 Z" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath52">
+      <path
+         id="path52"
+         style="stroke-width:0.1;stroke-linecap:square;paint-order:markers fill stroke;stop-color:#000000"
+         d="m -880.82767,-187.29769 h 1640.84 v 73.28155 h -1640.84 z" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath15">
+      <rect
+         style="fill:none;stroke:#000000;stroke-linecap:butt;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
+         id="rect15-7"
+         width="45.034248"
+         height="38.955639"
+         x="262.48285"
+         y="121.00073" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath166">
+      <rect
+         style="fill:none;stroke:#000000;stroke-width:0.999999;stroke-linecap:butt;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
+         id="rect166"
+         width="46.160622"
+         height="39.922417"
+         x="86.574379"
+         y="420.06253" />
+    </clipPath>
     <linearGradient
        id="swatch166"
        inkscape:swatch="solid">
@@ -79,6 +116,39 @@
          offset="0"
          id="stop166" />
     </linearGradient>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath159">
+      <rect
+         style="fill:none;stroke:#000000;stroke-width:0.999999;stroke-linecap:butt;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
+         id="rect159"
+         width="46.160622"
+         height="39.922417"
+         x="86.574379"
+         y="420.06253" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath27">
+      <rect
+         style="fill:none;stroke:#000000;stroke-width:0.999999;stroke-linecap:butt;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
+         id="rect28-6"
+         width="46.160622"
+         height="39.922417"
+         x="86.574379"
+         y="420.06253" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath24">
+      <rect
+         style="fill:none;stroke:#000000;stroke-width:0.999999;stroke-linecap:butt;stroke-linejoin:bevel;paint-order:stroke markers fill;stop-color:#000000"
+         id="rect24"
+         width="44.999748"
+         height="77.937294"
+         x="251.53429"
+         y="222.73541" />
+    </clipPath>
     <linearGradient
        id="linearGradient128"
        inkscape:collect="always">
@@ -342,6 +412,15 @@
     <linearGradient
        inkscape:collect="always"
        xlink:href="#swatch232"
+       id="linearGradient232-4"
+       x1="1167.5"
+       y1="484.00531"
+       x2="1708"
+       y2="484.00531"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#swatch232"
        id="linearGradient280"
        gradientUnits="userSpaceOnUse"
        x1="1167.5"
@@ -549,6 +628,16 @@
        y2="576.96021" />
     <linearGradient
        inkscape:collect="always"
+       xlink:href="#swatch232"
+       id="linearGradient657-0"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.7422381,0,0,1.2102177,-610.90587,-2713.9465)"
+       x1="1167.5"
+       y1="484.00531"
+       x2="1708"
+       y2="484.00531" />
+    <linearGradient
+       inkscape:collect="always"
        xlink:href="#linearGradient118"
        id="linearGradient683"
        gradientUnits="userSpaceOnUse"
@@ -635,6 +724,18 @@
          id="path48320-7"
          style="fill-opacity:1;stroke-width:0.395584" />
     </pattern>
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#Terrain-2"
+       preserveAspectRatio="xMidYMid"
+       id="pattern91"
+       patternTransform="translate(909.96215,46.355732)" />
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#Terrain-2"
+       preserveAspectRatio="xMidYMid"
+       id="pattern93"
+       patternTransform="translate(909.96215,46.355732)" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient80"
@@ -684,16 +785,7 @@
      inkscape:window-x="10"
      inkscape:window-y="42"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer2">
-    <inkscape:page
-       x="0"
-       y="0"
-       width="2505.3801"
-       height="4096.8804"
-       id="page2"
-       margin="0"
-       bleed="0" />
-  </sodipodi:namedview>
+     inkscape:current-layer="layer2" />
   <g
      inkscape:groupmode="layer"
      id="layer2"
